@@ -1,0 +1,135 @@
+# Deployment: Web Server
+# Runs gunicorn to serve the Django application
+# Exposes port 8000 for the LoadBalancer/Ingress
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: status-page-web
+  namespace: default
+  labels:
+    app: status-page
+    component: web
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  
+  selector:
+    matchLabels:
+      app: status-page
+      component: web
+  
+  template:
+    metadata:
+      labels:
+        app: status-page
+        component: web
+    
+    spec:
+      # Use the ServiceAccount configured for AWS Secrets Store access
+      serviceAccountName: status-page-sa
+      
+      # Security context: allow status-page user (1000) to read mounted secrets
+      securityContext:
+        fsGroup: 1000
+      
+      # Pod disruption budget for availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - status-page
+              topologyKey: kubernetes.io/hostname
+      
+      containers:
+      - name: gunicorn
+        image: status-page-app
+        imagePullPolicy: Always
+        
+        # Gunicorn command to start the web server
+        command:
+          - "gunicorn"
+          - "--bind=0.0.0.0:8000"
+          - "--workers=4"
+          - "--threads=2"
+          - "--worker-class=gthread"
+          - "--timeout=90" 
+          - "--access-logfile=-"
+          - "--error-logfile=-"
+          - "statuspage.wsgi:application"
+        
+        env:
+        - name: COMPONENT
+          value: "web"
+        
+        # Environment variables from ConfigMap
+        envFrom:
+        - configMapRef:
+            name: status-page-config
+
+        - secretRef:
+            name: status-page-infra-secrets
+        
+        # Port exposed by the container
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        
+        # Health checks using HTTP GET
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        
+        # Resource requests and limits
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        
+        # Security context for the container
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+        
+        # Mount the secrets from AWS Secrets Store CSI Driver
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      
+      # CSI volume for AWS Secrets Store
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "status-page-aws-secrets"

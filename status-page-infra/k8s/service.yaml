@@ -1,0 +1,28 @@
+---
+# Service: ClusterIP
+# Exposes the Web deployment on port 8000 within the cluster
+# Used by Ingress to route traffic to the web pods
+apiVersion: v1
+kind: Service
+metadata:
+  name: status-page-service
+  namespace: default
+  labels:
+    app: status-page
+    component: web
+spec:
+  type: ClusterIP
+  
+  # Target the web deployment pods
+  selector:
+    app: status-page
+    component: web
+  
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8000
+    targetPort: 8000
+  
+  # Session affinity (optional, for sticky sessions)
+  sessionAffinity: None
