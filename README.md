@@ -40,7 +40,7 @@ k8s/                Kubernetes manifests (Deployments, Services, Ingress, HPA, S
 docs/               Architecture documentation and cost estimation
 ```
 
-The application source code lives in a [separate repository](https://github.com/avivhananiya/status-page-app) as a fork of the upstream project.
+The application source code lives in a [separate repository](https://github.com/avivhananiya/status-page-aviv-yosef-app) as a fork of the upstream project.
 
 ## Tech Stack
 
