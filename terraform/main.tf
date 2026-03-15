@@ -148,11 +148,15 @@ resource "aws_db_instance" "postgres" {
   password                 = random_password.db_password.result
   db_subnet_group_name     = aws_db_subnet_group.this.id
   vpc_security_group_ids   = [aws_security_group.rds.id]
-  multi_az                 = true
-  publicly_accessible      = false
-  deletion_protection      = false
-  skip_final_snapshot      = true
-  apply_immediately        = true
+  multi_az                    = true
+  publicly_accessible         = false
+  deletion_protection         = true
+  skip_final_snapshot         = false
+  final_snapshot_identifier   = "${local.name_prefix}-db-final-snapshot"
+  backup_retention_period     = 7
+  backup_window               = "03:00-04:00"
+  storage_encrypted           = true
+  apply_immediately           = true
   tags = {
     Name        = "${local.name_prefix}-db"
     Environment = var.env
@@ -562,7 +566,7 @@ resource "helm_release" "cluster_autoscaler" {
   }
   set {
     name  = "awsRegion"
-    value = "us-east-1"
+    value = var.region
   }
   set {
     name  = "rbac.serviceAccount.create"
@@ -657,6 +661,7 @@ resource "helm_release" "external_secrets" {
   repository       = "https://charts.external-secrets.io"
   chart            = "external-secrets"
   namespace        = "external-secrets"
+  version          = "0.12.1"
   create_namespace = true
 
   set {
