@@ -1,6 +1,6 @@
 # Status-Page Infrastructure
 
-Production-grade AWS infrastructure for the open-source [Status-Page](https://github.com/Status-Page/Status-Page) application. Built for high availability, security, and cost efficiency.
+Production-grade AWS infrastructure for the [Status-Page](https://github.com/avivhananiya/status-page-aviv-yosef-app) application. Built for high availability, security, and cost efficiency.
 
 **Yosef Migirov & Aviv Hanania**
 
@@ -40,7 +40,7 @@ k8s/                Kubernetes manifests (Deployments, Services, Ingress, HPA, S
 docs/               Architecture documentation and cost estimation
 ```
 
-The application source code lives in a [separate repository](https://github.com/avivhananiya/status-page-aviv-yosef-app) as a fork of the upstream project.
+The application source code lives in a [separate repository](https://github.com/avivhananiya/status-page-aviv-yosef-app).
 
 ## Tech Stack
 
