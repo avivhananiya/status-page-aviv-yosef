@@ -22,8 +22,9 @@ module "vpc" {
   private_subnets = ["10.0.10.0/24", "10.0.11.0/24"]
   database_subnets= ["10.0.20.0/24", "10.0.21.0/24"]
 
-  enable_nat_gateway = true
-  single_nat_gateway = true
+  enable_nat_gateway      = true
+  single_nat_gateway      = false
+  one_nat_gateway_per_az  = true
 
   tags = {
     "Name"        = "${local.name_prefix}-vpc"
@@ -37,6 +38,22 @@ module "vpc" {
 
   private_subnet_tags = {
     "kubernetes.io/role/internal-elb" = "1"
+  }
+}
+
+# -------------------------
+# S3 Gateway Endpoint (free — removes S3 traffic from NAT)
+# -------------------------
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = module.vpc.vpc_id
+  service_name = "com.amazonaws.${var.region}.s3"
+
+  route_table_ids = module.vpc.private_route_table_ids
+
+  tags = {
+    Name        = "${local.name_prefix}-s3-endpoint"
+    Environment = var.env
+    ManagedBy   = "terraform"
   }
 }
 
