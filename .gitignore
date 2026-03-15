@@ -16,6 +16,9 @@ override.tf.json
 .env
 *.env
 
+# --- Internal docs ---
+docs/Implementation Tasks.md
+
 # --- General ---
 .DS_Store
 .vscode/
