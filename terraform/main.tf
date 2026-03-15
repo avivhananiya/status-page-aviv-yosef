@@ -58,11 +58,13 @@ module "eks" {
 
   eks_managed_node_groups = {
     default = {
-      desired_size = 2
-      min_size     = 2
-      max_size     = 4
+      desired_size   = 3
+      min_size       = 0
+      max_size       = 4
+      capacity_type  = "SPOT"
 
-      instance_types = ["t3.medium"]
+      instance_types = ["t4g.medium", "t4g.small", "m6g.medium"]
+      ami_type       = "AL2_ARM_64"
       disk_size      = 20
 
       key_name = null
@@ -140,9 +142,9 @@ resource "aws_db_instance" "postgres" {
   identifier               = "${local.name_prefix}-db"
   engine                   = "postgres"
   engine_version           = "15"
-  instance_class           = "db.t3.micro"
-  allocated_storage        = 20
-  storage_type             = "gp2"
+  instance_class           = "db.t4g.medium"
+  allocated_storage        = 50
+  storage_type             = "gp3"
   db_name                  = "statuspage"
   username                 = "statuspage"
   password                 = random_password.db_password.result

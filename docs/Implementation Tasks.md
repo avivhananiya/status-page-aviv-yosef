@@ -12,7 +12,7 @@
 **File:** `status-page-infra/terraform/main.tf` (EKS module)
 - [ ] Change instance type from `t3.medium` to `t4g.medium` (ARM/Graviton).
 - [ ] Set `capacity_type` to `SPOT` in the managed node group.
-- [ ] Add diversified instance types to the node group: `t4g.medium`, `t4g.small`, `t3a.medium`, `m6g.medium`.
+- [ ] Add diversified instance types to the node group: `t4g.medium`, `t4g.small`, `m6g.medium`.
 - [ ] Change desired/min/max from `2/2/4` to `3/0/4` (min 0 enables Scale-to-Zero).
 - [ ] Change EBS volume size from `20` to `20` (matches — no change needed).
 
