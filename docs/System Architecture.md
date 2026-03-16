@@ -68,17 +68,21 @@ To optimize performance, all static assets (CSS, JavaScript, images) are stored 
 
 To optimize log storage costs and reduce cluster overhead, we run the Amazon CloudWatch Agent as a centralized DaemonSet (one per node). This agent captures cluster-wide logs, filters out routine "noise" (like HTTP 200 health checks), and forwards only actionable alerts and errors, significantly reducing AWS log ingestion costs.
 
-### **3.2 Automated Updates (CI/CD with GitHub Actions & Argo CD)**
+### **3.2 Cost Governance in CI (Infracost)**
+
+Every Terraform pull request is automatically analyzed by **Infracost**, an open-source FinOps tool that estimates the monthly cost impact of infrastructure changes before they are merged. Infracost parses the Terraform HCL code, queries a pricing database of over 3 million cloud SKUs, and posts a cost diff directly as a PR comment — giving the team immediate visibility into whether a change increases, decreases, or has no effect on the monthly bill. This prevents cost surprises and enforces budget awareness at the code-review stage, without requiring cloud credentials or a `terraform apply`.
+
+### **3.3 Automated Updates (CI/CD with GitHub Actions & Argo CD)**
 
 Deployments are fully automated via a modern GitOps pipeline. Upon code commit, **GitHub Actions** (Continuous Integration) automatically runs tests, scans for vulnerabilities, and builds the container images.
 
 Once successful, our Continuous Delivery tool, **Argo CD**, detects changes in the Git repository and automatically pulls them into the Amazon EKS cluster. This guarantees the live environment always matches our declarative code, enabling zero-downtime rollouts and instant rollbacks.
 
-### **3.3 Infrastructure as Code (Terraform)**
+### **3.4 Infrastructure as Code (Terraform)**
 
 The entire cloud infrastructure—including the VPC, EKS cluster, RDS and ElastiCache instances, S3 buckets, and edge routing (WAF, ALB, Route 53)—is exclusively provisioned via declarative code using **Terraform**. Terraform state is stored remotely in an S3 backend with DynamoDB locking to enable safe, collaborative infrastructure changes.
 
-### **3.4 Scale-to-Zero Automation (EventBridge & Lambda)**
+### **3.5 Scale-to-Zero Automation (EventBridge & Lambda)**
 
 The Scale-to-Zero strategy is the architecture's primary cost optimization lever, reducing compute and database runtime from 730 to approximately 260 hours per month. An **Amazon EventBridge Scheduler** triggers **AWS Lambda** functions on a cron schedule to orchestrate the shutdown and startup of expensive resources.
 
@@ -100,7 +104,7 @@ The Scale-to-Zero strategy is the architecture's primary cost optimization lever
 * **RDS 7-day auto-restart:** AWS automatically restarts any stopped RDS instance after 7 consecutive days. Under our weekday schedule the maximum stop duration is \~64 hours, well within this limit. An auto-restart protection Lambda is deployed as a safety net for holiday periods.
 * **Startup health check:** A post-startup Lambda verifies RDS availability, node readiness, and application health (HTTP 200). Failures trigger an immediate SNS alert.
 
-### **3.5 Status-Page Availability & DNS Failover**
+### **3.6 Status-Page Availability & DNS Failover**
 
 Because a status page is the resource users rely on during outages, it must remain accessible even when the primary infrastructure degrades. We implement a layered availability strategy:
 

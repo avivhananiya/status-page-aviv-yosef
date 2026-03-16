@@ -56,6 +56,7 @@ The application source code lives in a [separate repository](https://github.com/
 | IaC | Terraform (S3 backend + DynamoDB locking) |
 | Observability | CloudWatch Agent (DaemonSet with FinOps log filtering) |
 | Cost Automation | EventBridge + Lambda (Scale-to-Zero) |
+| Cost Governance | Infracost (Terraform PR cost estimation) |
 
 ## Prerequisites
 
