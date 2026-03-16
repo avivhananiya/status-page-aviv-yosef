@@ -9,7 +9,7 @@ metadata:
 data:
   # Django settings
   DJANGO_SETTINGS_MODULE: "statuspage.settings"
-  STATUS_PAGE_CONFIGURATION: "statuspage.configuration"
+  STATUS_PAGE_CONFIGURATION: "statuspage.configuration_docker"
   
   # Database configuration (non-sensitive)
   DB_PORT: "5432"
@@ -27,7 +27,7 @@ data:
   # Site URL
   SITE_URL: " "  # Replace with your domain or ALB URL
   
-  # Allowed hosts — currently open; will be restricted to the project domain in Phase 4
+  # Allowed hosts — currently open; will be restricted to the project domain once DNS is configured
   ALLOWED_HOSTS: "*"
   
   # Email settings (non-sensitive parts)

@@ -74,7 +74,7 @@ Every Terraform pull request is automatically analyzed by **Infracost**, an open
 
 ### **3.3 Automated Updates (CI/CD with GitHub Actions & Argo CD)**
 
-Deployments are fully automated via a modern GitOps pipeline. Upon code commit, **GitHub Actions** (Continuous Integration) automatically runs tests, scans for vulnerabilities, and builds the container images.
+Deployments are fully automated via a modern GitOps pipeline. Upon code commit, **GitHub Actions** (Continuous Integration) automatically runs linting, executes the full test suite against real PostgreSQL and Redis services, builds the ARM container image, collects and uploads static assets to S3, and pushes the image to Amazon ECR.
 
 Once successful, our Continuous Delivery tool, **Argo CD**, detects changes in the Git repository and automatically pulls them into the Amazon EKS cluster. This guarantees the live environment always matches our declarative code, enabling zero-downtime rollouts and instant rollbacks.
 
@@ -103,14 +103,15 @@ The Scale-to-Zero strategy is the architecture's primary cost optimization lever
 * **Always-on services:** ElastiCache Redis and RDS Proxy cannot be natively stopped or paused—they run 24/7. Their costs are accounted for at full-month pricing.
 * **RDS 7-day auto-restart:** AWS automatically restarts any stopped RDS instance after 7 consecutive days. Under our weekday schedule the maximum stop duration is \~64 hours, well within this limit. An auto-restart protection Lambda is deployed as a safety net for holiday periods.
 * **Startup health check:** A post-startup Lambda verifies RDS availability, node readiness, and application health (HTTP 200). Failures trigger an immediate SNS alert.
+* **DNS Failover coordination:** During planned Scale-to-Zero shutdowns, the ALB will have no healthy backend targets. Route 53 will detect this and failover to the static S3 page—this is intentional and correct, since users visiting during off-hours should see a static page rather than a connection error. To prevent false-positive alerts, the shutdown Lambda suppresses the Route 53 CloudWatch alarm before scaling down, and the startup Lambda re-enables it after the health check confirms the application is serving traffic.
 
 ### **3.6 Status-Page Availability & DNS Failover**
 
 Because a status page is the resource users rely on during outages, it must remain accessible even when the primary infrastructure degrades. We implement a layered availability strategy:
 
 1. **Route 53 Alias with "Evaluate Target Health":** The DNS record for the status page is an Alias to the ALB with target health evaluation enabled. Route 53 continuously monitors the ALB's backend target health at no additional cost and without passing through the WAF.
-2. **Static S3 Failover Page:** A pre-deployed static HTML page hosted on **Amazon S3** serves as a secondary Route 53 failover target. If the ALB health evaluation reports unhealthy, Route 53 automatically resolves DNS to the S3-hosted page, displaying a "We are investigating" notice to end users.
-3. **SNS Alerting:** A CloudWatch alarm on the Route 53 health status metric triggers an SNS notification to the operations team the moment a failover is activated.
+2. **Static S3 Failover Page:** A pre-deployed static HTML page hosted on **Amazon S3** serves as a secondary Route 53 failover target. If the ALB health evaluation reports unhealthy, Route 53 automatically resolves DNS to the S3-hosted page, displaying a "We are investigating" notice to end users. During planned Scale-to-Zero windows, this failover activates by design, serving as the off-hours landing page.
+3. **SNS Alerting:** A CloudWatch alarm on the Route 53 health status metric triggers an SNS notification to the operations team when a failover is activated. Planned shutdowns suppress this alarm to avoid false positives (see Section 3.5, Operational Constraints).
 
 ## **4\. Architectural Decisions and Trade-offs**
 

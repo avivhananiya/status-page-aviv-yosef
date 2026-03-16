@@ -26,7 +26,7 @@ Internet --> Route 53 (DNS Failover) --> AWS WAF --> ALB (HTTPS)
 
 **Key design decisions:**
 - **Graviton (ARM)** processors across compute and data layers for 20% cost reduction
-- **Spot Instances** with diversified types (t4g.medium, t4g.small, m6g.medium) for ~70% compute savings
+- **Spot Instances** with diversified types (t4g.medium, t4g.small, m6g.medium) for ~50-60% compute savings
 - **Scale-to-Zero** via EventBridge + Lambda shuts down compute and RDS outside business hours
 - **RDS Proxy** for sub-second database failover and connection pooling
 - **GitOps** with GitHub Actions (CI) and Argo CD (CD) for pull-based deployments
