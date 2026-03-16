@@ -95,12 +95,12 @@ kubectl apply -k k8s/
 
 ## Cost
 
-**$289/month** for a full Multi-AZ, high-availability architecture — under a $300 budget.
+**$287/month** for a full Multi-AZ, high-availability architecture — under a $300 budget.
 
 | Layer | Monthly Cost |
 |---|---|
-| Compute (EKS + Spot Nodes) | $85.91 |
-| Data (RDS + RDS Proxy + Redis) | $95.24 |
+| Compute (EKS + Spot Nodes) | $89.03 |
+| Data (RDS + RDS Proxy + Redis) | $90.30 |
 | Networking (NAT GWs + ALB) | $85.52 |
 | Security & Management | $21.90 |
 

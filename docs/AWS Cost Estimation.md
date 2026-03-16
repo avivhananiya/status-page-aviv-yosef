@@ -10,28 +10,28 @@
 
 ## **1\. Executive Cost Summary 📊**
 
-The estimated cost for running the full architecture (High Availability & Multi-AZ) has dropped drastically and currently stands at **$288.57 per month**.
+The estimated cost for running the full architecture (High Availability & Multi-AZ) has dropped drastically and currently stands at **$286.75 per month**.
 
 We achieved the budget goal (under $300) without compromising on reliability (two availability zones remain active) by implementing industry Best Practices from the FinOps domain: migrating to **AWS Graviton** processors, utilizing **Spot Instances**, and leveraging the organizational CronJob to shut down expensive resources outside of working hours (**Scale to Zero**).
 
 ## **2\. Detailed FinOps Cost Breakdown 💰**
 
-### **2.1 Platform & Compute Layer (Compute & K8s) \- Total: $85.91**
+### **2.1 Platform & Compute Layer (Compute & K8s) \- Total: $89.03**
 
-* **Amazon EKS Control Plane (Runs 24/7):**  
-  * **Pricing:** $0.10/hour × 730 hours.  
-  * **Cost:** $73.00/month  
-* **EC2 Worker Nodes (Runs 260 hours):** 3 servers of type t4g.medium (ARM-based Graviton processors). Running tasks on Spot Instances to reduce costs.  
-  * **Compute Pricing (Spot):** \~$0.0104/hour × 260 hours × 3 servers \= $8.11.  
-  * **Storage Pricing (EBS gp3):** 20GB per server (Total 60GB) × $0.08 per GB \= $4.80.  
-  * **Cost:** $12.91/month
+* **Amazon EKS Control Plane (Runs 24/7):**
+  * **Pricing:** $0.10/hour × 730 hours.
+  * **Cost:** $73.00/month
+* **EC2 Worker Nodes (Runs 260 hours):** 3 servers of type t4g.medium (ARM-based Graviton processors). Running tasks on Spot Instances to reduce costs.
+  * **Compute Pricing (Spot):** \~$0.0144/hour × 260 hours × 3 servers \= $11.23.
+  * **Storage Pricing (EBS gp3):** 20GB per server (Total 60GB) × $0.08 per GB \= $4.80.
+  * **Cost:** $16.03/month
 
-### **2.2 Data Layer \- Total: $95.24**
+### **2.2 Data Layer \- Total: $90.30**
 
 * **Amazon RDS (PostgreSQL):** db.t4g.medium server in **Multi-AZ** configuration (active synchronous replica).
-  * **Compute Pricing (Graviton):** $0.148/hour × 260 active hours only \= $38.48.
+  * **Compute Pricing (Graviton):** $0.129/hour × 260 active hours only \= $33.54.
   * **Storage Pricing (gp3 Multi-AZ):** 50GB × $0.23 per GB \= $11.50.
-  * **Cost:** $49.98/month
+  * **Cost:** $45.04/month
 * **Amazon RDS Proxy (Runs 24/7):**
   * **Pricing:** $0.015 per vCPU/hour. The server has 2 vCPUs.
   * **Calculation:** $0.03 × 730 hours.
@@ -67,15 +67,15 @@ We achieved the budget goal (under $300) without compromising on reliability (tw
 
 ## **3\. FinOps Strategies Implemented 🚀**
 
-To reduce costs from the initial $455 down to $288 without compromising quality or reliability (avoiding a downgrade to Single-AZ), we implemented 3 advanced DevOps/FinOps techniques recognized as industry Best Practices:
+To reduce costs from the initial $455 down to $287 without compromising quality or reliability (avoiding a downgrade to Single-AZ), we implemented 3 advanced DevOps/FinOps techniques recognized as industry Best Practices:
 
 1. **Migration to ARM Architecture (AWS Graviton Processors):** Instead of using traditional x86 processors (t3), the entire architecture was converted to Graviton processors (t4g series for EC2, RDS, and ElastiCache). This change alone improves performance and cuts about 20% off the hourly costs of compute and data components.  
 2. **Leveraging Organizational Automation for "Scale to Zero":** Cloud provisioning was calculated based on an operating duration of 12 hours on weekdays (approx. 260 monthly hours). By integrating the organizational CronJob with the EKS Cluster Autoscaler, the architecture automatically "puts to sleep" Web and Worker pods, reduces EC2 consumption to zero, and pauses the RDS instances during nights and weekends—an action that saves over 60% of the runtime for the most expensive resources.  
-3. **Integrating Spot Instances in Kubernetes:** Since the application is divided into layers and microservices (separation of Web and Workers), it was configured so that components performing asynchronous background work run on **AWS Spot Instances**. This grants the system a massive discount of about 70-90% on these servers, while gracefully managing service terminations (via Kubernetes Termination Grace Period). To reduce Spot interruption risk during scale-up, the ASG is configured with diversified instance types (t4g.medium, t4g.small, m6g.medium), tapping into multiple capacity pools.
+3. **Integrating Spot Instances in Kubernetes:** Since the application is divided into layers and microservices (separation of Web and Workers), it was configured so that components performing asynchronous background work run on **AWS Spot Instances**. This grants the system a significant discount of about 50-60% on these servers, while gracefully managing service terminations (via Kubernetes Termination Grace Period). To reduce Spot interruption risk during scale-up, the ASG is configured with diversified instance types (t4g.medium, t4g.small, m6g.medium), tapping into multiple capacity pools.
 
 ## **4\. Scale-to-Zero: Key Assumptions and Risks 🔒**
 
-The Scale-to-Zero strategy is the single largest cost-saving lever in this architecture (saving \~$166/month). Because the entire budget depends on it, the following operational constraints are documented:
+The Scale-to-Zero strategy is the single largest cost-saving lever in this architecture (saving \~$81/month). Because the entire budget depends on it, the following operational constraints are documented:
 
 1. **Shutdown/Startup Automation:** An **Amazon EventBridge Scheduler** triggers **AWS Lambda** functions on a cron schedule (shutdown at end of business, startup before working hours). Lambda orchestrates the sequence: drain application pods, scale EKS node group to zero desired instances, then stop the RDS instance. Startup reverses this order—RDS starts first (allow 10–15 minutes to become available), then EKS nodes scale up, and pods schedule automatically.
 2. **Services That Cannot Be Paused:** ElastiCache Redis and RDS Proxy have no native stop/pause capability. Their costs are reflected as full 24/7 charges in Section 2.2. Deleting and recreating these resources during off-hours was evaluated but rejected due to added automation complexity and startup latency.
