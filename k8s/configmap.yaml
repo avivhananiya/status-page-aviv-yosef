@@ -27,8 +27,8 @@ data:
   # Site URL
   SITE_URL: " "  # Replace with your domain or ALB URL
   
-  # Allowed hosts
-  ALLOWED_HOSTS: "*"  # Replace with your domains
+  # Allowed hosts — currently open; will be restricted to the project domain in Phase 4
+  ALLOWED_HOSTS: "*"
   
   # Email settings (non-sensitive parts)
   EMAIL_HOST: "smtp.example.com"

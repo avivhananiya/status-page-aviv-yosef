@@ -5,7 +5,6 @@ resources:
   - external-secrets.yaml
   - deployment-web.yaml
   - deployment-worker.yaml
-  - deployment-scheduler.yaml
   - job-migration.yaml
   - hpa.yaml
   - serviceaccount.yaml

@@ -13,7 +13,7 @@ metadata:
 spec:
   # Automatically delete the job pod after 1 week if completed
   ttlSecondsAfterFinished: 604800
-  # One-time migration - don't retry
+  # Allow 1 retry on transient failure (e.g., DB not yet available after Scale-to-Zero startup)
   backoffLimit: 1
   template:
     metadata:

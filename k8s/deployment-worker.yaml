@@ -1,6 +1,7 @@
 ---
 # Deployment: RQ Worker
-# Runs the RQ (Redis Queue) worker for background task processing
+# Runs RQ workers with built-in leader-elected scheduling (--with-scheduler)
+# Replaces the singleton Scheduler deployment — any worker can assume the scheduler role
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -50,16 +51,20 @@ spec:
                   - status-page
               topologyKey: kubernetes.io/hostname
       
+      # Allow 120s for graceful shutdown (Spot instances give 2-min eviction warning)
+      terminationGracePeriodSeconds: 120
+
       containers:
       - name: rq-worker
         image: status-page-app
         imagePullPolicy: Always
         
-        # RQ Worker command to process background tasks
+        # RQ Worker with built-in scheduler (leader election among workers)
         command:
           - "python"
           - "manage.py"
           - "rqworker"
+          - "--with-scheduler"
           - "default"
           - "high"
           - "low"
