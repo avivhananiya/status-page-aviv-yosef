@@ -37,6 +37,8 @@ Internet --> Route 53 (DNS Failover) --> AWS WAF --> ALB (HTTPS)
 ```
 terraform/          AWS infrastructure (VPC, EKS, RDS, ElastiCache, WAF, Route 53)
 k8s/                Kubernetes manifests (Deployments, Services, Ingress, HPA, Secrets)
+argocd/             ArgoCD Application manifest (GitOps CD)
+.github/workflows/  CI pipelines (Terraform validation, Infracost cost estimation)
 docs/               Architecture documentation and cost estimation
 ```
 

@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: status-page
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/avivhananiya/status-page-aviv-yosef.git
+    targetRevision: main
+    path: k8s
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+
+  syncPolicy:
+    automated:
+      prune: true      # Remove resources deleted from Git
+      selfHeal: true   # Revert manual cluster changes to match Git
+    syncOptions:
+      - CreateNamespace=false
