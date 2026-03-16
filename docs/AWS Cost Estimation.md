@@ -10,7 +10,7 @@
 
 ## **1\. Executive Cost Summary 📊**
 
-The estimated cost for running the full architecture (High Availability & Multi-AZ) has dropped drastically and currently stands at **$289.37 per month**.
+The estimated cost for running the full architecture (High Availability & Multi-AZ) has dropped drastically and currently stands at **$288.57 per month**.
 
 We achieved the budget goal (under $300) without compromising on reliability (two availability zones remain active) by implementing industry Best Practices from the FinOps domain: migrating to **AWS Graviton** processors, utilizing **Spot Instances**, and leveraging the organizational CronJob to shut down expensive resources outside of working hours (**Scale to Zero**).
 
@@ -54,20 +54,20 @@ We achieved the budget goal (under $300) without compromising on reliability (tw
   * **Load Pricing (LCU):** Assuming 0.5 LCU/hour × $0.008 × 730 \= $2.92.  
   * **Cost:** $19.37/month
 
-### **2.4 Security, Storage & Management Layer \- Total: $22.70**
+### **2.4 Security, Storage & Management Layer \- Total: $21.90**
 
 * **AWS WAF:** $5.00 (WebACL) \+ $3.00 (3 rules) \+ $0.60 (per million requests).  
   * **Cost:** $8.60/month  
 * **Amazon CloudWatch:** Accurate and filtered log collection of \~10GB.  
   * **Cost:** $5.00/month  
-* **AWS Secrets Manager:** Payment for 5 managed secrets.  
-  * **Cost:** $2.00/month  
+* **AWS Secrets Manager:** Payment for 3 managed secrets (DB credentials, Redis auth token, Django secret key).
+  * **Cost:** $1.20/month  
 * **Amazon Route 53 & S3:** Hosted Zone management, DNS queries, and low-tier S3 storage for static files.  
   * **Cost:** \~$7.10/month
 
 ## **3\. FinOps Strategies Implemented 🚀**
 
-To reduce costs from the initial $455 down to $289 without compromising quality or reliability (avoiding a downgrade to Single-AZ), we implemented 3 advanced DevOps/FinOps techniques recognized as industry Best Practices:
+To reduce costs from the initial $455 down to $288 without compromising quality or reliability (avoiding a downgrade to Single-AZ), we implemented 3 advanced DevOps/FinOps techniques recognized as industry Best Practices:
 
 1. **Migration to ARM Architecture (AWS Graviton Processors):** Instead of using traditional x86 processors (t3), the entire architecture was converted to Graviton processors (t4g series for EC2, RDS, and ElastiCache). This change alone improves performance and cuts about 20% off the hourly costs of compute and data components.  
 2. **Leveraging Organizational Automation for "Scale to Zero":** Cloud provisioning was calculated based on an operating duration of 12 hours on weekdays (approx. 260 monthly hours). By integrating the organizational CronJob with the EKS Cluster Autoscaler, the architecture automatically "puts to sleep" Web and Worker pods, reduces EC2 consumption to zero, and pauses the RDS instances during nights and weekends—an action that saves over 60% of the runtime for the most expensive resources.  

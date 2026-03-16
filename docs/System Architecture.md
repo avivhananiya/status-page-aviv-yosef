@@ -4,7 +4,7 @@
 
 *Yosef Migirov & Aviv Hanania*
 
-*February 2026*
+*March 2026*
 
 ## **1\. Executive Summary**
 
@@ -14,16 +14,17 @@ To ensure consistent, accurate, and reproducible management of this complex infr
 
 ## **2\. Core System Layers**
 
-### **2.1 (Routing and Security Layer (Route 53 & WAF**
+### **2.1 Routing and Security Layer (Route 53 & WAF)**
 
 Amazon Route 53 routes inbound DNS queries directly to our Application Load Balancer (ALB). AWS WAF (Web Application Firewall) is attached directly to the ALB, securing the application without the overhead of a caching layer. This setup efficiently blocks malicious attacks (such as SQL injection, XSS, or DDoS attempts) before they reach our application logic.
 
-### **2.2 (Distributed Network Layer (AWS Network**
+### **2.2 Distributed Network Layer (AWS VPC)**
 
 Our Virtual Private Cloud (VPC) is split across two Availability Zones for high availability and contains strictly segregated subnets:
 
 * **Public Network:** Contains only the routing components (ALB) responsible for receiving public traffic.  
 * **Private Network:** Hosts our compute and database resources, strictly isolated from direct internet access. Outbound internet traffic for updates is securely routed through NAT Gateways, while administrative access is securely managed via **AWS Systems Manager (SSM) Session Manager** without opening any inbound ports.
+* **S3 Gateway Endpoint:** A VPC Gateway Endpoint routes all S3 traffic directly over the AWS backbone, bypassing the NAT Gateways entirely. This eliminates NAT data-processing charges for static asset uploads, Terraform state access, and container image layers—at zero additional cost.
 
 ### **2.3 Smart Compute Layer & Kubernetes Resources**
 
@@ -41,16 +42,23 @@ We utilize Amazon EKS (Kubernetes) to orchestrate our highly dynamic Python, Dja
    * **ConfigMap & AWS Secrets Manager:** ConfigMaps strictly store non-sensitive environment variables. For sensitive credentials (e.g., database/Redis passwords), we utilize **AWS Secrets Manager** integrated via the **Secrets Store CSI Driver**. By mounting secrets as temporary in-memory volumes, the CSI driver prevents log leaks and completely eliminates the critical risk of exposing credentials within the Kubernetes etcd database.  
    * **Cluster Autoscaler:** Monitors for pods in a "Pending" state due to insufficient cluster resources and triggers the AWS Auto Scaling Group (ASG) to dynamically provision or terminate EC2 instances. The ASG is configured with diversified Spot Instance types (t4g.medium, t4g.small, m6g.medium) to tap into multiple capacity pools and reduce the risk of Spot unavailability during scale-up events.
 
-### **2.4 (Data Layer (Automated Survivability with RDS & ElastiCache**
+### **2.4 Data Layer (Automated Survivability with RDS & ElastiCache)**
 
 Site and user data is stored in a managed database using an Amazon RDS Multi-AZ strategy. Similarly, background task queues are managed by **Amazon ElastiCache for Redis** in a Multi-AZ deployment to prevent task loss during zone failures. To achieve seamless failover for the primary database, we implemented Amazon RDS Proxy.
 
+**Data Protection:**
+
+* **Deletion Protection** is enabled to prevent accidental database termination.
+* **Automated Backups** are retained for 7 days with a dedicated backup window, enabling point-in-time recovery to any second within the retention period.
+* **Final Snapshot** is enforced on deletion, ensuring data is never permanently lost during infrastructure teardown.
+* **Encryption at Rest** is enabled via AWS KMS, protecting all data, backups, and snapshots.
+
 **Why RDS Proxy?**
 
-* **Reduced Failover Time:** Instead of relying on slow DNS propagation, the Proxy automatically routes traffic to the new standby instance within seconds.  
+* **Reduced Failover Time:** Instead of relying on slow DNS propagation, the Proxy automatically routes traffic to the new standby instance within seconds.
 * **Connection Pooling:** Since Django opens a new connection per request, the Proxy manages a pool of established connections, drastically reducing database CPU overhead during sudden traffic spikes.
 
-### **2.5 (Static Assets Delivery (Amazon S3**
+### **2.5 Static Assets Delivery (Amazon S3)**
 
 To optimize performance, all static assets (CSS, JavaScript, images) are stored in and served directly from an **Amazon S3** bucket. During the CI/CD pipeline, Django's static files are automatically collected and uploaded. This strictly focuses our web pods on processing dynamic application logic rather than serving static files.
 
@@ -60,7 +68,7 @@ To optimize performance, all static assets (CSS, JavaScript, images) are stored 
 
 To optimize log storage costs and reduce cluster overhead, we run the Amazon CloudWatch Agent as a centralized DaemonSet (one per node). This agent captures cluster-wide logs, filters out routine "noise" (like HTTP 200 health checks), and forwards only actionable alerts and errors, significantly reducing AWS log ingestion costs.
 
-### **3.2 (Automated Updates (CI/CD with GitHub Actions & Argo CD**
+### **3.2 Automated Updates (CI/CD with GitHub Actions & Argo CD)**
 
 Deployments are fully automated via a modern GitOps pipeline. Upon code commit, **GitHub Actions** (Continuous Integration) automatically runs tests, scans for vulnerabilities, and builds the container images.
 
