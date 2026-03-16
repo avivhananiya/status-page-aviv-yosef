@@ -14,6 +14,16 @@ The estimated cost for running the full architecture (High Availability & Multi-
 
 We achieved the budget goal (under $300) without compromising on reliability (two availability zones remain active) by implementing industry Best Practices from the FinOps domain: migrating to **AWS Graviton** processors, utilizing **Spot Instances**, and leveraging the organizational CronJob to shut down expensive resources outside of working hours (**Scale to Zero**).
 
+**24/7 Production Reference:** If the architecture runs continuously without Scale-to-Zero, the monthly cost is **$367.69**.
+
+| Layer | Scale-to-Zero (260hr) | Full 24/7 (730hr) |
+|---|---|---|
+| Compute (EKS + Spot Nodes) | $89.03 | $109.34 |
+| Data (RDS + RDS Proxy + Redis) | $90.30 | $150.93 |
+| Networking (NAT GWs + ALB) | $85.52 | $85.52 |
+| Security & Management | $21.90 | $21.90 |
+| **Total** | **$286.75** | **$367.69** |
+
 ## **2\. Detailed FinOps Cost Breakdown 💰**
 
 ### **2.1 Platform & Compute Layer (Compute & K8s) \- Total: $89.03**
