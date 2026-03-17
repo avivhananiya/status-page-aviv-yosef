@@ -11,7 +11,13 @@ output "vpc_private_subnets" {
 }
 
 output "rds_endpoint" {
-  value = aws_db_instance.postgres.address
+  description = "Direct RDS instance endpoint (for debugging only)"
+  value       = aws_db_instance.postgres.address
+}
+
+output "rds_proxy_endpoint" {
+  description = "RDS Proxy endpoint (used by application pods)"
+  value       = aws_db_proxy.this.endpoint
 }
 
 output "redis_primary_endpoint" {
