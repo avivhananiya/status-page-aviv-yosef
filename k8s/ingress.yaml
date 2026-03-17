@@ -21,7 +21,9 @@ metadata:
     alb.ingress.kubernetes.io/wafv2-acl-arn: "REPLACE_WITH_WAF_ACL_ARN"
     
     # Listen only on HTTP port 80 for testing
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    external-dns.alpha.kubernetes.io/hostname: yosef-aviv-statuspage.xyz
     
     # Health check settings
     alb.ingress.kubernetes.io/healthcheck-path: "/"
@@ -43,7 +45,8 @@ spec:
   ingressClassName: "alb"
   
   rules:
-  - http:
+  - host: yosef-aviv-statuspage.xyz
+    http:
       paths:
       - path: /
         pathType: Prefix
