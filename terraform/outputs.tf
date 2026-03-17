@@ -59,3 +59,8 @@ output "acm_certificate_arn" {
   description = "ACM certificate ARN — use in Ingress annotation: alb.ingress.kubernetes.io/certificate-arn"
   value       = aws_acm_certificate.cert.arn
 }
+
+output "sns_failover_topic_arn" {
+  description = "SNS topic ARN for DNS failover alerts — subscribe your email to receive notifications"
+  value       = aws_sns_topic.failover_alert.arn
+}
