@@ -49,3 +49,8 @@ output "ecr_repository_url" {
   description = "The URL of the ECR repository"
   value       = aws_ecr_repository.app.repository_url
 }
+
+output "waf_web_acl_arn" {
+  description = "WAF Web ACL ARN — use in Ingress annotation: alb.ingress.kubernetes.io/wafv2-acl-arn"
+  value       = aws_wafv2_web_acl.this.arn
+}

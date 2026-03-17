@@ -16,6 +16,9 @@ metadata:
     alb.ingress.kubernetes.io/load-balancer-name: "status-page-alb"
     alb.ingress.kubernetes.io/scheme: "internet-facing"
     alb.ingress.kubernetes.io/target-type: "ip"
+
+    # AWS WAF — replace with actual ARN from: terraform output waf_web_acl_arn
+    alb.ingress.kubernetes.io/wafv2-acl-arn: "REPLACE_WITH_WAF_ACL_ARN"
     
     # Listen only on HTTP port 80 for testing
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
