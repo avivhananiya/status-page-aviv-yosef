@@ -675,6 +675,12 @@ resource "aws_acm_certificate" "cert" {
   lifecycle {
     create_before_destroy = true
   }
+
+  tags = {
+    Name        = "${local.name_prefix}-cert"
+    Environment = var.env
+    ManagedBy   = "terraform"
+  }
 }
 
 resource "aws_route53_record" "cert_validation" {
@@ -691,7 +697,7 @@ resource "aws_route53_record" "cert_validation" {
   records         = [each.value.record]
   ttl             = 60
   type            = each.value.type
-  zone_id         = data.aws_route53_zone.main.zone_id # משתמש ב-ID מה-data!
+  zone_id         = data.aws_route53_zone.main.zone_id
 }
 
 resource "aws_acm_certificate_validation" "cert" {
@@ -957,6 +963,7 @@ resource "aws_wafv2_web_acl" "this" {
     Environment = var.env
     ManagedBy   = "terraform"
   }
+}
 
 # ------------------------------------------------------
 # ExternalDNS (IRSA & Helm Release)

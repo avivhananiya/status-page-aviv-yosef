@@ -1,7 +1,7 @@
 ---
-# Ingress: AWS Load Balancer Controller (HTTP Only for Testing)
-# Routes external HTTP traffic to the status-page-service
-# Uses AWS Application Load Balancer
+# Ingress: AWS Load Balancer Controller
+# Routes external traffic to the status-page-service via ALB
+# HTTPS with HTTP-to-HTTPS redirect, WAF protection, ExternalDNS
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -20,9 +20,12 @@ metadata:
     # AWS WAF — replace with actual ARN from: terraform output waf_web_acl_arn
     alb.ingress.kubernetes.io/wafv2-acl-arn: "REPLACE_WITH_WAF_ACL_ARN"
     
-    # Listen only on HTTP port 80 for testing
+    # HTTPS + HTTP-to-HTTPS redirect
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
+    # ACM certificate — replace with actual ARN from: terraform output acm_certificate_arn
+    alb.ingress.kubernetes.io/certificate-arn: "REPLACE_WITH_ACM_CERTIFICATE_ARN"
+    # ExternalDNS — auto-creates Route 53 A record for the domain
     external-dns.alpha.kubernetes.io/hostname: yosef-aviv-statuspage.xyz
     
     # Health check settings

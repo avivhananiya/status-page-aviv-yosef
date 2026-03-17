@@ -54,3 +54,8 @@ output "waf_web_acl_arn" {
   description = "WAF Web ACL ARN — use in Ingress annotation: alb.ingress.kubernetes.io/wafv2-acl-arn"
   value       = aws_wafv2_web_acl.this.arn
 }
+
+output "acm_certificate_arn" {
+  description = "ACM certificate ARN — use in Ingress annotation: alb.ingress.kubernetes.io/certificate-arn"
+  value       = aws_acm_certificate.cert.arn
+}
