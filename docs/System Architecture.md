@@ -82,36 +82,23 @@ Once successful, our Continuous Delivery tool, **Argo CD**, detects changes in t
 
 The entire cloud infrastructure—including the VPC, EKS cluster, RDS and ElastiCache instances, S3 buckets, and edge routing (WAF, ALB, Route 53)—is exclusively provisioned via declarative code using **Terraform**. Terraform state is stored remotely in an S3 backend with DynamoDB locking to enable safe, collaborative infrastructure changes.
 
-### **3.5 Scale-to-Zero Automation (EventBridge & Lambda)**
+### **3.5 Business-Hours Operating Model**
 
-The Scale-to-Zero strategy is the architecture's primary cost optimization lever, reducing compute and database runtime from 730 to approximately 260 hours per month. An **Amazon EventBridge Scheduler** triggers **AWS Lambda** functions on a cron schedule to orchestrate the shutdown and startup of expensive resources.
+Compute resources operate during business hours only (~12 hours on weekdays), reducing compute and database runtime from 730 to approximately 260 hours per month.
 
-**Shutdown Sequence (end of business):**
-
-1. Scale application Deployments to 0 replicas, allowing pods to drain gracefully.
-2. Scale the EKS managed node group to 0 desired instances.
-3. Stop the RDS instance via the AWS API.
-
-**Startup Sequence (before working hours):**
-
-1. Start the RDS instance and wait until it reaches `available` status (typically 10–15 minutes).
-2. Scale the EKS managed node group back to the desired count. Nodes launch in parallel (\~3–5 minutes).
-3. Pods auto-schedule and connect to the database through RDS Proxy.
-
-**Operational Constraints:**
+**Key constraints for our architecture:**
 
 * **Always-on services:** ElastiCache Redis and RDS Proxy cannot be natively stopped or paused—they run 24/7. Their costs are accounted for at full-month pricing.
-* **RDS 7-day auto-restart:** AWS automatically restarts any stopped RDS instance after 7 consecutive days. Under our weekday schedule the maximum stop duration is \~64 hours, well within this limit. An auto-restart protection Lambda is deployed as a safety net for holiday periods.
-* **Startup health check:** A post-startup Lambda verifies RDS availability, node readiness, and application health (HTTP 200). Failures trigger an immediate SNS alert.
-* **DNS Failover coordination:** During planned Scale-to-Zero shutdowns, the ALB will have no healthy backend targets. Route 53 will detect this and failover to the static S3 page—this is intentional and correct, since users visiting during off-hours should see a static page rather than a connection error. To prevent false-positive alerts, the shutdown Lambda suppresses the Route 53 CloudWatch alarm before scaling down, and the startup Lambda re-enables it after the health check confirms the application is serving traffic.
+* **DNS Failover during off-hours:** When compute resources are shut down, the ALB has no healthy backend targets. Route 53 detects this and failovers to the static S3 page—users visiting during off-hours see a maintenance page rather than a connection error.
+* **Spot fallback on startup:** If Spot capacity is unavailable at morning startup, the on-demand node group (desired_size=0, max_size=1) serves as an emergency fallback via the Cluster Autoscaler.
 
 ### **3.6 Status-Page Availability & DNS Failover**
 
 Because a status page is the resource users rely on during outages, it must remain accessible even when the primary infrastructure degrades. We implement a layered availability strategy:
 
 1. **Route 53 Alias with "Evaluate Target Health":** The DNS record for the status page is an Alias to the ALB with target health evaluation enabled. Route 53 continuously monitors the ALB's backend target health at no additional cost and without passing through the WAF.
-2. **Static S3 Failover Page:** A pre-deployed static HTML page hosted on **Amazon S3** serves as a secondary Route 53 failover target. If the ALB health evaluation reports unhealthy, Route 53 automatically resolves DNS to the S3-hosted page, displaying a "We are investigating" notice to end users. During planned Scale-to-Zero windows, this failover activates by design, serving as the off-hours landing page.
-3. **SNS Alerting:** A CloudWatch alarm on the Route 53 health status metric triggers an SNS notification to the operations team when a failover is activated. Planned shutdowns suppress this alarm to avoid false positives (see Section 3.5, Operational Constraints).
+2. **Static S3 Failover Page:** A pre-deployed static HTML page hosted on **Amazon S3** serves as a secondary Route 53 failover target. If the ALB health evaluation reports unhealthy, Route 53 automatically resolves DNS to the S3-hosted page, displaying a "We are investigating" notice to end users. During off-hours when compute resources are shut down, this failover activates by design, serving as the off-hours landing page.
+3. **SNS Alerting:** A CloudWatch alarm on the Route 53 health status metric triggers an SNS notification to the operations team when a failover is activated.
 
 ## **4\. Architectural Decisions and Trade-offs**
 
@@ -165,7 +152,7 @@ Below is the rationale for our selected stack and the alternatives we evaluated:
 
 ### **4.10 Scheduling: Why Leader-Elected Workers over a Singleton Scheduler?**
 
-* **Alternative (Dedicated Singleton Deployment):** Running a single Scheduler pod (replicas: 1) creates a Single Point of Failure. On Spot Instance clusters, node eviction leaves a gap of 2–5 minutes where no tasks are scheduled. Pinning the Scheduler to a dedicated On-Demand node solves this but introduces a second node group, taints, affinity rules, and complicates the Scale-to-Zero sequence.
+* **Alternative (Dedicated Singleton Deployment):** Running a single Scheduler pod (replicas: 1) creates a Single Point of Failure. On Spot Instance clusters, node eviction leaves a gap of 2–5 minutes where no tasks are scheduled. Pinning the Scheduler to a dedicated On-Demand node solves this but introduces taints, affinity rules, and additional complexity.
 * **Decision (RQ `--with-scheduler` on Workers):** Enabling the built-in scheduler flag on all Worker pods activates RQ's native leader election. Only one Worker schedules tasks at a time; if it fails, another takes over within seconds—no dedicated Deployment, no singleton risk, and no additional node group required.
 
 ### **4.11 Status-Page Availability: Why DNS Failover over External Hosting?**

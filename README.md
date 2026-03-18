@@ -6,7 +6,7 @@ Production-grade AWS infrastructure for the [Status-Page](https://github.com/avi
 
 ## Architecture
 
-Multi-AZ deployment on AWS EKS with automated failover, edge security, and Scale-to-Zero cost optimization.
+Multi-AZ deployment on AWS EKS with automated failover, edge security, and FinOps cost optimization.
 
 ```
 Internet --> Route 53 (DNS Failover) --> AWS WAF --> ALB (HTTPS)
@@ -27,7 +27,7 @@ Internet --> Route 53 (DNS Failover) --> AWS WAF --> ALB (HTTPS)
 **Key design decisions:**
 - **Graviton (ARM)** processors across compute and data layers for 20% cost reduction
 - **Spot Instances** with diversified types (t4g.medium, t4g.small, m6g.medium) for ~50-60% compute savings
-- **Scale-to-Zero** via EventBridge + Lambda shuts down compute and RDS outside business hours
+- **Business-hours-only compute** — resources operate ~260 hours/month (working hours), cutting compute costs by over 60%
 - **RDS Proxy** for sub-second database failover and connection pooling
 - **GitOps** with GitHub Actions (CI) and Argo CD (CD) for pull-based deployments
 - **DNS Failover** to a static S3 page ensures the status page is reachable even during full outages
@@ -57,7 +57,6 @@ The application source code lives in a [separate repository](https://github.com/
 | CI/CD | GitHub Actions + Argo CD (GitOps) |
 | IaC | Terraform (S3 backend + DynamoDB locking) |
 | Observability | CloudWatch Agent (DaemonSet with FinOps log filtering) |
-| Cost Automation | EventBridge + Lambda (Scale-to-Zero) |
 | Cost Governance | Infracost (Terraform PR cost estimation) |
 
 ## Prerequisites
