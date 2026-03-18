@@ -5,12 +5,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: status-page-web
-  namespace: default
+  namespace: {{ .Values.namespace }}
   labels:
     app: status-page
     component: web
 spec:
-  replicas: 2
+  replicas: {{ .Values.web.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -52,8 +52,8 @@ spec:
       
       containers:
       - name: gunicorn
-        image: status-page-app
-        imagePullPolicy: Always
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         
         # Gunicorn command to start the web server
         command:
@@ -79,6 +79,10 @@ spec:
         - secretRef:
             name: status-page-infra-secrets
         
+        # Resource requests and limits
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        
         # Port exposed by the container
         ports:
         - name: http
@@ -99,15 +103,6 @@ spec:
             port: 8000
           initialDelaySeconds: 10
           periodSeconds: 10
-        
-        # Resource requests and limits
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
         
         # Security context for the container
         securityContext:

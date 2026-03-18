@@ -6,7 +6,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: status-page-migration
-  namespace: default
+  namespace: {{ .Values.namespace }}
   labels:
     app: status-page
     component: migration
@@ -31,8 +31,8 @@ spec:
       
       containers:
       - name: django-migrate
-        image: status-page-app
-        imagePullPolicy: IfNotPresent
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         
         # Override the default gunicorn command to run migrations
         command:

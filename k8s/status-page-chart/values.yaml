@@ -1,0 +1,42 @@
+# values.yaml
+
+# Namespace
+namespace: "default"
+
+# Image Configuration
+image:
+  repository: s992382545251.dkr.ecr.us-east-1.amazonaws.com/yosef-aviv-status-page-prod
+  tag: "latest"
+  pullPolicy: Always
+
+# Scaling
+web:
+  replicaCount: 2
+  minReplicas: 2
+  maxReplicas: 10
+worker:
+  replicaCount: 1
+  minReplicas: 1
+  maxReplicas: 5
+
+# Networking
+ingress:
+  host: yosef-aviv-statuspage.xyz
+  certificateArn: "REPLACE_WITH_ACM_CERTIFICATE_ARN"
+  wafAclArn: "REPLACE_WITH_WAF_ACL_ARN"
+
+# AWS / Infrastructure
+aws:
+  region: us-east-1
+  roleArn: "arn:aws:iam::992382545251:role/yosef-aviv-status-page-prod-irsa-role"
+  paramStorePath: "/yosef-aviv-status-page-prod"
+  secretsManagerNamePrefix: "yosef-aviv-status-page-prod"
+
+# Resources
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"

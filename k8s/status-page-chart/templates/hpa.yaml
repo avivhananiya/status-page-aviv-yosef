@@ -4,14 +4,14 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: status-page-web-hpa
-  namespace: default
+  namespace: {{ .Values.namespace }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: status-page-web
-  minReplicas: 2
-  maxReplicas: 10
+  minReplicas: {{ .Values.web.minReplicas }}
+  maxReplicas: {{ .Values.web.maxReplicas }}
   metrics:
   - type: Resource
     resource:
@@ -26,14 +26,14 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: status-page-worker-hpa
-  namespace: default
+  namespace: {{ .Values.namespace }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: status-page-worker
-  minReplicas: 1
-  maxReplicas: 5
+  minReplicas: {{ .Values.worker.minReplicas }}
+  maxReplicas: {{ .Values.worker.maxReplicas }}
   metrics:
   - type: Resource
     resource:

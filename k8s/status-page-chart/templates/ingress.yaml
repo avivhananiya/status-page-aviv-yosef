@@ -6,7 +6,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: status-page-ingress
-  namespace: default
+  namespace: {{ .Values.namespace }}
   labels:
     app: status-page
   
@@ -18,13 +18,13 @@ metadata:
     alb.ingress.kubernetes.io/target-type: "ip"
 
     # AWS WAF — replace with actual ARN from: terraform output waf_web_acl_arn
-    alb.ingress.kubernetes.io/wafv2-acl-arn: "REPLACE_WITH_WAF_ACL_ARN"
+    alb.ingress.kubernetes.io/wafv2-acl-arn: "{{ .Values.ingress.wafAclArn }}"
     
     # HTTPS + HTTP-to-HTTPS redirect
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     # ACM certificate — replace with actual ARN from: terraform output acm_certificate_arn
-    alb.ingress.kubernetes.io/certificate-arn: "REPLACE_WITH_ACM_CERTIFICATE_ARN"
+    alb.ingress.kubernetes.io/certificate-arn: "{{ .Values.ingress.certificateArn }}"
     
     # Health check settings
     alb.ingress.kubernetes.io/healthcheck-path: "/"
@@ -46,7 +46,7 @@ spec:
   ingressClassName: "alb"
   
   rules:
-  - host: yosef-aviv-statuspage.xyz
+  - host: {{ .Values.ingress.host }}
     http:
       paths:
       - path: /

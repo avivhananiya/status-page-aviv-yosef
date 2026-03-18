@@ -5,11 +5,14 @@ metadata:
   namespace: argocd
 spec:
   project: default
-
   source:
     repoURL: https://github.com/avivhananiya/status-page-aviv-yosef.git
     targetRevision: main
-    path: k8s
+    path: k8s/status-page-chart
+
+  helm:
+    valueFiles:
+      - values.yaml
 
   destination:
     server: https://kubernetes.default.svc
@@ -20,4 +23,4 @@ spec:
       prune: true      # Remove resources deleted from Git
       selfHeal: true   # Revert manual cluster changes to match Git
     syncOptions:
-      - CreateNamespace=false
+      - CreateNamespace=true  # Automatically create the namespace if it doesn't exist

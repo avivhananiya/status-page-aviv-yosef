@@ -6,12 +6,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: status-page-worker
-  namespace: default
+  namespace: {{ .Values.namespace }}
   labels:
     app: status-page
     component: worker
 spec:
-  replicas: 1
+  replicas: {{ .Values.worker.replicaCount }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -56,8 +56,8 @@ spec:
 
       containers:
       - name: rq-worker
-        image: status-page-app
-        imagePullPolicy: Always
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         
         # RQ Worker with built-in scheduler (leader election among workers)
         command:
@@ -79,12 +79,7 @@ spec:
         
         # Resource requests and limits
         resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
+          {{- toYaml .Values.resources | nindent 10 }}
         
         # Security context for the container
         securityContext:
