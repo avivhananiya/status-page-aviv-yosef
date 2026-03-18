@@ -75,7 +75,8 @@ module "eks" {
   enable_cluster_creator_admin_permissions = true
 
   eks_managed_node_groups = {
-    default = {
+    spot = {
+      name           = "spot-nodes"
       desired_size   = 3
       min_size       = 0
       max_size       = 4
@@ -91,6 +92,34 @@ module "eks" {
 
       iam_role_additional_policies = {
         CloudWatchAgentServerPolicy = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+      }
+
+      tags = {
+        "NodeGroup" = "spot"
+      }
+    }
+
+    on_demand = {
+      name           = "on-demand-nodes"
+      desired_size   = 0
+      min_size       = 0
+      max_size       = 1
+      capacity_type  = "ON_DEMAND"
+
+      instance_types = ["t4g.medium", "m6g.medium"]
+      ami_type       = "AL2_ARM_64"
+      disk_size      = 20
+
+      key_name = null
+
+      additional_security_group_ids = []
+
+      iam_role_additional_policies = {
+        CloudWatchAgentServerPolicy = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+      }
+
+      tags = {
+        "NodeGroup" = "on-demand"
       }
     }
   }
