@@ -14,8 +14,8 @@ variable "vpc_cidr" {
 }
 
 variable "availability_zones" {
-  type = list(string)
-  default = []
+  type        = list(string)
+  default     = []
   description = "Optional list of AZs. If empty, provider default AZs will be used (module will pick two)"
 }
 
