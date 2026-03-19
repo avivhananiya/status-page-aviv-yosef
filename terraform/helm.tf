@@ -40,6 +40,7 @@ resource "helm_release" "csi_secrets_store" {
   chart      = "secrets-store-csi-driver"
   namespace  = "kube-system"
   version    = "1.4.2"
+  wait       = false
 
   set {
     name  = "syncSecret.enabled"
@@ -55,6 +56,7 @@ resource "helm_release" "csi_secrets_store_provider_aws" {
   chart      = "secrets-store-csi-driver-provider-aws"
   namespace  = "kube-system"
   version    = "0.3.8"
+  wait       = false
 
   depends_on = [helm_release.csi_secrets_store]
 }

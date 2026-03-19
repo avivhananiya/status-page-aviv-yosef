@@ -18,3 +18,9 @@ variable "availability_zones" {
   default = []
   description = "Optional list of AZs. If empty, provider default AZs will be used (module will pick two)"
 }
+
+variable "enable_dns_failover" {
+  type        = bool
+  default     = false
+  description = "Enable DNS failover records (requires ALB to exist). Set to true after K8s Ingress creates the ALB."
+}

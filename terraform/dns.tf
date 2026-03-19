@@ -50,13 +50,13 @@ resource "aws_acm_certificate_validation" "cert" {
 # ==========================================
 # DNS Failover — S3 Static Page + Route 53 + Alerting
 # ==========================================
-# NOTE: data.aws_lb requires the ALB to exist (created by the
-#       AWS Load Balancer Controller when the Ingress is applied).
-#       On first deploy: apply Terraform, then kubectl apply -k k8s/,
-#       then terraform apply again to create the failover records.
+# NOTE: The ALB is created by the AWS Load Balancer Controller when the
+#       K8s Ingress is applied — it does not exist before the first deploy.
+#       Deploy order: terraform apply → kubectl apply → terraform apply -var="enable_dns_failover=true"
 
 data "aws_lb" "alb" {
-  name = "status-page-alb"
+  count = var.enable_dns_failover ? 1 : 0
+  name  = "status-page-alb"
 }
 
 # S3 bucket for failover page (bucket name must match domain for Route 53 Alias)
@@ -154,6 +154,7 @@ resource "aws_s3_object" "failover_index" {
 # Route 53 Failover Records
 # ==========================================
 resource "aws_route53_record" "primary" {
+  count   = var.enable_dns_failover ? 1 : 0
   zone_id = data.aws_route53_zone.main.zone_id
   name    = local.domain_name
   type    = "A"
@@ -165,13 +166,14 @@ resource "aws_route53_record" "primary" {
   }
 
   alias {
-    name                   = data.aws_lb.alb.dns_name
-    zone_id                = data.aws_lb.alb.zone_id
+    name                   = data.aws_lb.alb[0].dns_name
+    zone_id                = data.aws_lb.alb[0].zone_id
     evaluate_target_health = true
   }
 }
 
 resource "aws_route53_record" "secondary" {
+  count   = var.enable_dns_failover ? 1 : 0
   zone_id = data.aws_route53_zone.main.zone_id
   name    = local.domain_name
   type    = "A"
@@ -193,7 +195,8 @@ resource "aws_route53_record" "secondary" {
 # Health Check & Alerting
 # ==========================================
 resource "aws_route53_health_check" "alb" {
-  fqdn              = data.aws_lb.alb.dns_name
+  count             = var.enable_dns_failover ? 1 : 0
+  fqdn              = data.aws_lb.alb[0].dns_name
   port              = 80
   type              = "HTTP"
   resource_path     = "/"
@@ -208,7 +211,8 @@ resource "aws_route53_health_check" "alb" {
 }
 
 resource "aws_sns_topic" "failover_alert" {
-  name = "${local.name_prefix}-failover-alert"
+  count = var.enable_dns_failover ? 1 : 0
+  name  = "${local.name_prefix}-failover-alert"
   tags = {
     Name        = "${local.name_prefix}-failover-alert"
     Environment = var.env
@@ -217,6 +221,7 @@ resource "aws_sns_topic" "failover_alert" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "failover" {
+  count               = var.enable_dns_failover ? 1 : 0
   alarm_name          = "${local.name_prefix}-failover-alert"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = 1
@@ -226,11 +231,11 @@ resource "aws_cloudwatch_metric_alarm" "failover" {
   statistic           = "Minimum"
   threshold           = 1
   alarm_description   = "Status Page ALB health check failed — DNS failover activated"
-  alarm_actions       = [aws_sns_topic.failover_alert.arn]
-  ok_actions          = [aws_sns_topic.failover_alert.arn]
+  alarm_actions       = [aws_sns_topic.failover_alert[0].arn]
+  ok_actions          = [aws_sns_topic.failover_alert[0].arn]
 
   dimensions = {
-    HealthCheckId = aws_route53_health_check.alb.id
+    HealthCheckId = aws_route53_health_check.alb[0].id
   }
 
   tags = {

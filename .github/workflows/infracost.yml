@@ -18,6 +18,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+
+      - name: Terraform Init (no backend)
+        run: terraform init -backend=false
+        working-directory: terraform
+
       - name: Setup Infracost
         uses: infracost/actions/setup@v3
         with:
@@ -27,6 +36,7 @@ jobs:
         run: |
           infracost breakdown \
             --path terraform \
+            --terraform-init-flags "-backend=false" \
             --format json \
             --out-file /tmp/infracost.json
 

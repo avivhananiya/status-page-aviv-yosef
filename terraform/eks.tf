@@ -67,11 +67,11 @@ module "eks" {
   enable_irsa = true
 
   cluster_addons = {
-      coredns                         = { most_recent = true }
-      kube-proxy                      = { most_recent = true }
-      vpc-cni                         = { most_recent = true }
-      amazon-cloudwatch-observability = { most_recent = true }
-    }
+    coredns                         = { most_recent = true }
+    kube-proxy                      = { most_recent = true }
+    vpc-cni                         = { most_recent = true }
+    amazon-cloudwatch-observability = { most_recent = true }
+  }
 
   tags = {
     "Name"        = "${local.name_prefix}-eks"
