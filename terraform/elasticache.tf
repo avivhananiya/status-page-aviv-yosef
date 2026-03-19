@@ -15,19 +15,19 @@ resource "aws_elasticache_subnet_group" "this" {
 # ElastiCache (Redis)
 # -------------------------
 resource "aws_elasticache_replication_group" "redis" {
-  replication_group_id          = "${local.name_prefix}-redis"
-  description                   = "Status Page Redis (${var.env})"
-  engine                        = "redis"
-  node_type                     = "cache.t4g.micro"
-  num_cache_clusters            = 2
-  automatic_failover_enabled    = true
-  transit_encryption_enabled    = true
-  at_rest_encryption_enabled    = true
-  port                          = 6379
-  subnet_group_name             = aws_elasticache_subnet_group.this.name
-  security_group_ids            = [aws_security_group.redis.id]
-  auth_token                    = random_string.redis_token.result
-  apply_immediately             = true
+  replication_group_id       = "${local.name_prefix}-redis"
+  description                = "Status Page Redis (${var.env})"
+  engine                     = "redis"
+  node_type                  = "cache.t4g.micro"
+  num_cache_clusters         = 2
+  automatic_failover_enabled = true
+  transit_encryption_enabled = true
+  at_rest_encryption_enabled = true
+  port                       = 6379
+  subnet_group_name          = aws_elasticache_subnet_group.this.name
+  security_group_ids         = [aws_security_group.redis.id]
+  auth_token                 = random_string.redis_token.result
+  apply_immediately          = true
   tags = {
     Name        = "${local.name_prefix}-redis"
     Environment = var.env

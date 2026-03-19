@@ -15,26 +15,26 @@ resource "aws_db_subnet_group" "this" {
 # RDS Instance (Postgres)
 # -------------------------
 resource "aws_db_instance" "postgres" {
-  identifier               = "${local.name_prefix}-db"
-  engine                   = "postgres"
-  engine_version           = "15"
-  instance_class           = "db.t4g.medium"
-  allocated_storage        = 50
-  storage_type             = "gp3"
-  db_name                  = "statuspage"
-  username                 = "statuspage"
-  password                 = random_password.db_password.result
-  db_subnet_group_name     = aws_db_subnet_group.this.id
-  vpc_security_group_ids   = [aws_security_group.rds.id]
-  multi_az                    = true
-  publicly_accessible         = false
-  deletion_protection         = true
-  skip_final_snapshot         = false
-  final_snapshot_identifier   = "${local.name_prefix}-db-final-snapshot"
-  backup_retention_period     = 7
-  backup_window               = "03:00-04:00"
-  storage_encrypted           = true
-  apply_immediately           = true
+  identifier                = "${local.name_prefix}-db"
+  engine                    = "postgres"
+  engine_version            = "15"
+  instance_class            = "db.t4g.medium"
+  allocated_storage         = 50
+  storage_type              = "gp3"
+  db_name                   = "statuspage"
+  username                  = "statuspage"
+  password                  = random_password.db_password.result
+  db_subnet_group_name      = aws_db_subnet_group.this.id
+  vpc_security_group_ids    = [aws_security_group.rds.id]
+  multi_az                  = true
+  publicly_accessible       = false
+  deletion_protection       = true
+  skip_final_snapshot       = false
+  final_snapshot_identifier = "${local.name_prefix}-db-final-snapshot"
+  backup_retention_period   = 7
+  backup_window             = "03:00-04:00"
+  storage_encrypted         = true
+  apply_immediately         = true
   tags = {
     Name        = "${local.name_prefix}-db"
     Environment = var.env
