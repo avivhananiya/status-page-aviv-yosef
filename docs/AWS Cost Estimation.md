@@ -10,31 +10,31 @@
 
 ## **1\. Executive Cost Summary 📊**
 
-The estimated cost for running the full architecture (High Availability & Multi-AZ) has dropped drastically and currently stands at **$286.75 per month**.
+The estimated cost for running the full architecture (High Availability & Multi-AZ) has dropped drastically and currently stands at **$296.58 per month**.
 
-We achieved the budget goal (under $300) without compromising on reliability (two availability zones remain active) by implementing industry Best Practices from the FinOps domain: migrating to **AWS Graviton** processors, utilizing **Spot Instances**, and operating compute resources during business hours only (~260 hours/month).
+We achieved the budget goal (under $300) without compromising on reliability (two availability zones remain active) by implementing industry Best Practices from the FinOps domain: migrating to **AWS Graviton** processors, utilizing **Spot Instances**, and operating compute resources during business hours only (~260 hours/month). The t4g.large instance type was chosen over t4g.medium to maximize pod-per-node density (35 vs 8), reducing total node count while maintaining cluster capacity.
 
-**24/7 Production Reference:** If the architecture runs continuously without off-hours shutdowns, the monthly cost is **$367.69**.
+**24/7 Production Reference:** If the architecture runs continuously without off-hours shutdowns, the monthly cost is **$390.28**.
 
 | Layer | With Scheduling (260hr) | Full 24/7 (730hr) |
 |---|---|---|
-| Compute (EKS + Spot Nodes) | $89.03 | $109.34 |
+| Compute (EKS + Spot Nodes) | $98.86 | $131.93 |
 | Data (RDS + RDS Proxy + Redis) | $90.30 | $150.93 |
 | Networking (NAT GWs + ALB) | $85.52 | $85.52 |
 | Security & Management | $21.90 | $21.90 |
-| **Total** | **$286.75** | **$367.69** |
+| **Total** | **$296.58** | **$390.28** |
 
 ## **2\. Detailed FinOps Cost Breakdown 💰**
 
-### **2.1 Platform & Compute Layer (Compute & K8s) \- Total: $89.03**
+### **2.1 Platform & Compute Layer (Compute & K8s) \- Total: $98.86**
 
 * **Amazon EKS Control Plane (Runs 24/7):**
   * **Pricing:** $0.10/hour × 730 hours.
   * **Cost:** $73.00/month
-* **EC2 Worker Nodes (Runs 260 hours):** 3 servers of type t4g.medium (ARM-based Graviton processors). Running tasks on Spot Instances to reduce costs.
-  * **Compute Pricing (Spot):** \~$0.0144/hour × 260 hours × 3 servers \= $11.23.
+* **EC2 Worker Nodes (Runs 260 hours):** 3 servers of type t4g.large (ARM-based Graviton processors, 2 vCPU / 8 GiB). Running tasks on Spot Instances to reduce costs. Larger instance type chosen to maximize pod capacity per node (35 pods vs 8 on t4g.medium), reducing total node count.
+  * **Compute Pricing (Spot):** \~$0.027/hour × 260 hours × 3 servers \= $21.06.
   * **Storage Pricing (EBS gp3):** 20GB per server (Total 60GB) × $0.08 per GB \= $4.80.
-  * **Cost:** $16.03/month
+  * **Cost:** $25.86/month
 
 ### **2.2 Data Layer \- Total: $90.30**
 
@@ -77,11 +77,11 @@ We achieved the budget goal (under $300) without compromising on reliability (tw
 
 ## **3\. FinOps Strategies Implemented 🚀**
 
-To reduce costs from the initial $455 down to $287 without compromising quality or reliability (avoiding a downgrade to Single-AZ), we implemented 3 advanced DevOps/FinOps techniques recognized as industry Best Practices:
+To reduce costs from the initial $455 down to $297 without compromising quality or reliability (avoiding a downgrade to Single-AZ), we implemented 3 advanced DevOps/FinOps techniques recognized as industry Best Practices:
 
 1. **Migration to ARM Architecture (AWS Graviton Processors):** Instead of using traditional x86 processors (t3), the entire architecture was converted to Graviton processors (t4g series for EC2, RDS, and ElastiCache). This change alone improves performance and cuts about 20% off the hourly costs of compute and data components.  
 2. **Business-Hours-Only Compute:** Cloud provisioning was calculated based on an operating duration of 12 hours on weekdays (approx. 260 monthly hours). Compute resources are shut down outside working hours — Web and Worker pods go to sleep, EC2 consumption drops to zero, and RDS instances are stopped during nights and weekends — saving over 60% of the runtime for the most expensive resources.  
-3. **Integrating Spot Instances in Kubernetes:** Since the application is divided into layers and microservices (separation of Web and Workers), it was configured so that components performing asynchronous background work run on **AWS Spot Instances**. This grants the system a significant discount of about 50-60% on these servers, while gracefully managing service terminations (via Kubernetes Termination Grace Period). To reduce Spot interruption risk during scale-up, the ASG is configured with diversified instance types (t4g.medium, t4g.small, m6g.medium), tapping into multiple capacity pools.
+3. **Integrating Spot Instances in Kubernetes:** Since the application is divided into layers and microservices (separation of Web and Workers), it was configured so that components performing asynchronous background work run on **AWS Spot Instances**. This grants the system a significant discount of about 50-60% on these servers, while gracefully managing service terminations (via Kubernetes Termination Grace Period). To reduce Spot interruption risk during scale-up, the ASG is configured with diversified instance types (t4g.large, m6g.large), tapping into multiple capacity pools.
 
 ## **4\. Resource Scheduling: Key Assumptions and Constraints 🔒**
 

@@ -40,7 +40,7 @@ We utilize Amazon EKS (Kubernetes) to orchestrate our highly dynamic Python, Dja
    * **Job (DB Migration):** A temporary pod spun up during CI/CD deployments to run PostgreSQL migration scripts. It terminates upon successful completion, ensuring the schema is ready before new application pods serve traffic.  
 4. **Shared Infrastructure and Cluster Management:**  
    * **ConfigMap & AWS Secrets Manager:** ConfigMaps strictly store non-sensitive environment variables. For sensitive credentials (e.g., database/Redis passwords), we utilize **AWS Secrets Manager** integrated via the **Secrets Store CSI Driver**. By mounting secrets as temporary in-memory volumes, the CSI driver prevents log leaks and completely eliminates the critical risk of exposing credentials within the Kubernetes etcd database.  
-   * **Cluster Autoscaler:** Monitors for pods in a "Pending" state due to insufficient cluster resources and triggers the AWS Auto Scaling Group (ASG) to dynamically provision or terminate EC2 instances. The ASG is configured with diversified Spot Instance types (t4g.medium, t4g.small, m6g.medium) to tap into multiple capacity pools and reduce the risk of Spot unavailability during scale-up events.
+   * **Cluster Autoscaler:** Monitors for pods in a "Pending" state due to insufficient cluster resources and triggers the AWS Auto Scaling Group (ASG) to dynamically provision or terminate EC2 instances. The ASG is configured with diversified Spot Instance types (t4g.large, m6g.large) to tap into multiple capacity pools and reduce the risk of Spot unavailability during scale-up events.
 
 ### **2.4 Data Layer (Automated Survivability with RDS & ElastiCache)**
 
