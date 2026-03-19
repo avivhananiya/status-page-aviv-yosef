@@ -6,7 +6,7 @@ module "eks" {
   version = "~> 20.0"
 
   cluster_name    = local.name_prefix
-  cluster_version = "1.30"
+  cluster_version = "1.35"
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
@@ -22,8 +22,8 @@ module "eks" {
       max_size       = 4
       capacity_type  = "SPOT"
 
-      instance_types = ["t4g.medium", "t4g.small", "m6g.medium"]
-      ami_type       = "AL2_ARM_64"
+      instance_types = ["t4g.large", "m6g.large"]
+      ami_type       = "AL2023_ARM_64_STANDARD"
       disk_size      = 20
 
       key_name = null
@@ -46,8 +46,8 @@ module "eks" {
       max_size       = 1
       capacity_type  = "ON_DEMAND"
 
-      instance_types = ["t4g.medium", "m6g.medium"]
-      ami_type       = "AL2_ARM_64"
+      instance_types = ["t4g.large", "m6g.large"]
+      ami_type       = "AL2023_ARM_64_STANDARD"
       disk_size      = 20
 
       key_name = null
@@ -67,10 +67,11 @@ module "eks" {
   enable_irsa = true
 
   cluster_addons = {
-    "amazon-cloudwatch-observability" = {
-      most_recent = true
+      coredns                         = { most_recent = true }
+      kube-proxy                      = { most_recent = true }
+      vpc-cni                         = { most_recent = true }
+      amazon-cloudwatch-observability = { most_recent = true }
     }
-  }
 
   tags = {
     "Name"        = "${local.name_prefix}-eks"

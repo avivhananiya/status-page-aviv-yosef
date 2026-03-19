@@ -10,9 +10,9 @@ spec:
     targetRevision: main
     path: k8s/status-page-chart
 
-  helm:
-    valueFiles:
-      - values.yaml
+    helm:
+      valueFiles:
+        - values.yaml
 
   destination:
     server: https://kubernetes.default.svc
