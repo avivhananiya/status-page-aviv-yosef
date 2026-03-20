@@ -22,8 +22,8 @@ worker:
 # Networking
 ingress:
   host: yosef-aviv-statuspage.xyz
-  certificateArn: "REPLACE_WITH_ACM_CERTIFICATE_ARN"
-  wafAclArn: "REPLACE_WITH_WAF_ACL_ARN"
+  certificateArn: "arn:aws:acm:us-east-1:992382545251:certificate/c5972ef3-8014-4d82-a608-9224e4faad02"
+  wafAclArn: "arn:aws:wafv2:us-east-1:992382545251:regional/webacl/yosef-aviv-status-page-prod-waf/fe6441f0-4942-4caf-bd91-e795aac5ce88"
 
 # AWS / Infrastructure
 aws:
