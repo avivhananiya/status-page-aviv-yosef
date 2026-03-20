@@ -27,8 +27,8 @@ data:
   # Site URL
   SITE_URL: "https://{{ .Values.ingress.host }}"
   
-  # Allowed hosts — currently open; will be restricted to the project domain once DNS is configured
-  ALLOWED_HOSTS: "*"
+  # Allowed hosts — restricted to the project domain
+  ALLOWED_HOSTS: "yosef-aviv-statuspage.xyz"
   
   # Email settings (non-sensitive parts)
   EMAIL_HOST: "smtp.example.com"
