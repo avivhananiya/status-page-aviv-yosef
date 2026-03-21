@@ -27,7 +27,7 @@ metadata:
     alb.ingress.kubernetes.io/certificate-arn: "{{ .Values.ingress.certificateArn }}"
     
     # Health check settings
-    alb.ingress.kubernetes.io/healthcheck-path: "/health"
+    alb.ingress.kubernetes.io/healthcheck-path: "/"
     alb.ingress.kubernetes.io/healthcheck-protocol: "HTTP"
     alb.ingress.kubernetes.io/healthy-threshold-count: "2"
     alb.ingress.kubernetes.io/unhealthy-threshold-count: "2"
