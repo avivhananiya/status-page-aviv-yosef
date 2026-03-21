@@ -94,6 +94,9 @@ spec:
           httpGet:
             path: /
             port: 8000
+            httpHeaders:
+            - name: Host
+              value: "{{ .Values.ingress.host }}"
           initialDelaySeconds: 30
           periodSeconds: 15
           timeoutSeconds: 5
@@ -101,6 +104,9 @@ spec:
           httpGet:
             path: /
             port: 8000
+            httpHeaders:
+            - name: Host
+              value: "{{ .Values.ingress.host }}"
           initialDelaySeconds: 10
           periodSeconds: 10
         
