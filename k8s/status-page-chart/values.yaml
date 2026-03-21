@@ -31,6 +31,7 @@ aws:
   roleArn: "arn:aws:iam::992382545251:role/yosef-aviv-status-page-prod-irsa-role"
   paramStorePath: "/yosef-aviv-status-page-prod"
   secretsManagerNamePrefix: "yosef-aviv-status-page-prod"
+  staticUrl: "https://status-page-yosef-aviv-7q9uueof.s3.us-east-1.amazonaws.com"
 
 # Resources
 resources:

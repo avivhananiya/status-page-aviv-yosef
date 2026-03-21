@@ -21,7 +21,8 @@ data:
   REDIS_DB_CACHE: "1"
   REDIS_SSL: "True"
 
-  # Static files configuration
+  # Static files — served from S3 (uploaded by CI pipeline)
+  STATIC_URL: "{{ .Values.aws.staticUrl }}/static/"
   STATIC_ROOT: "/app/static/"
 
   # Site URL
