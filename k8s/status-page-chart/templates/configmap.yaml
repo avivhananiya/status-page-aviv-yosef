@@ -21,8 +21,7 @@ data:
   REDIS_DB_CACHE: "1"
   REDIS_SSL: "True"
 
-  # Static files — served from S3 (uploaded by CI pipeline)
-  STATIC_URL: "{{ .Values.aws.staticUrl }}/static/"
+  # Static files — STATIC_URL is injected from SSM via ExternalSecret
   STATIC_ROOT: "/app/static/"
 
   # Site URL
