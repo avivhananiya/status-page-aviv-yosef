@@ -25,9 +25,11 @@ metadata:
     # ACM certificate — replace with actual ARN from: terraform output acm_certificate_arn
     alb.ingress.kubernetes.io/certificate-arn: "{{ .Values.ingress.certificateArn }}"
     
-    # Health check: TCP avoids Django ALLOWED_HOSTS rejecting ALB probes (no Host header).
-    # App-level health is checked by K8s liveness/readiness probes which set the Host header.
-    alb.ingress.kubernetes.io/healthcheck-protocol: "TCP"
+    # Health check: ALB probes lack a Host header, so Django returns 400 (ALLOWED_HOSTS).
+    # Accept 400 as healthy — it proves the pod is alive. K8s probes do full HTTP checks.
+    alb.ingress.kubernetes.io/success-codes: "200,400"
+    alb.ingress.kubernetes.io/healthcheck-path: "/"
+    alb.ingress.kubernetes.io/healthcheck-protocol: "HTTP"
     alb.ingress.kubernetes.io/healthy-threshold-count: "2"
     alb.ingress.kubernetes.io/unhealthy-threshold-count: "2"
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
