@@ -21,6 +21,6 @@ variable "availability_zones" {
 
 variable "enable_dns_failover" {
   type        = bool
-  default     = false
-  description = "Enable DNS failover records (requires ALB to exist). Set to true after K8s Ingress creates the ALB."
+  default     = true
+  description = "Enable DNS failover records (requires ALB to exist). Was default false during initial bootstrap before ALB existed."
 }
