@@ -90,6 +90,26 @@ resource "aws_security_group_rule" "rds_proxy_from_eks" {
   description              = "Allow Postgres from EKS nodes to RDS Proxy"
 }
 
+resource "aws_security_group_rule" "rds_proxy_to_rds" {
+  type                     = "egress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.rds_proxy.id
+  source_security_group_id = aws_security_group.rds.id
+  description              = "Allow RDS Proxy to connect to RDS on Postgres port"
+}
+
+resource "aws_security_group_rule" "rds_proxy_to_secrets_manager" {
+  type              = "egress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.rds_proxy.id
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "Allow HTTPS to AWS services (Secrets Manager)"
+}
+
 resource "aws_iam_role" "rds_proxy" {
   name = "${local.name_prefix}-rds-proxy-role"
   assume_role_policy = jsonencode({
