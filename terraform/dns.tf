@@ -195,7 +195,7 @@ resource "aws_route53_record" "secondary" {
 # Health Check & Alerting
 # ==========================================
 resource "aws_route53_health_check" "alb" {
-  count             = var.enable_dns_failover ? 1 : 0
+  count             = var.enable_sns_alerting ? 1 : 0
   fqdn              = data.aws_lb.alb[0].dns_name
   port              = 80
   type              = "HTTP"
