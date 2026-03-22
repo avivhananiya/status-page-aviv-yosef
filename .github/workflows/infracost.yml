@@ -15,31 +15,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.9.0"
 
-      - name: Terraform Init (no backend)
-        run: terraform init -backend=false
-        working-directory: terraform
-
-      - name: Setup Infracost
-        uses: infracost/actions/setup@v3
-        with:
-          api-key: ${{ secrets.INFRACOST_API_KEY }}
-
-      - name: Generate PR branch breakdown
-        run: |
-          infracost breakdown \
-            --path terraform \
-            --terraform-init-flags "-backend=false" \
-            --format json \
-            --out-file /tmp/infracost-pr.json
-
+      # --- Base branch baseline ---
       - name: Checkout base branch
         uses: actions/checkout@v4
         with:
@@ -57,10 +43,19 @@ jobs:
             --format json \
             --out-file /tmp/infracost-base.json
 
-      - name: Generate diff
+      # --- PR branch diff ---
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Terraform Init PR (no backend)
+        run: terraform init -backend=false
+        working-directory: terraform
+
+      - name: Generate diff against base
         run: |
           infracost diff \
-            --path /tmp/infracost-pr.json \
+            --path terraform \
+            --terraform-init-flags "-backend=false" \
             --compare-to /tmp/infracost-base.json \
             --format json \
             --out-file /tmp/infracost-diff.json
