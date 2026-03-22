@@ -8,26 +8,11 @@ Production-grade AWS infrastructure for the [Status-Page](https://github.com/avi
 
 Multi-AZ deployment on AWS EKS with automated failover, edge security, and FinOps cost optimization.
 
-```
-Internet --> Route 53 (DNS Failover) --> AWS WAF --> ALB (HTTPS)
-                                                       |
-                 +-------------------------------------+------------------------------------+
-                 |            AZ-a                      |            AZ-b                    |
-                 |  NAT GW    EKS Nodes (Spot/ARM)      |  NAT GW    EKS Nodes (Spot/ARM)   |
-                 |            - Web Pods (HPA)           |            - Web Pods (HPA)        |
-                 |            - Worker Pods              |            - Worker Pods           |
-                 +-------------------------------------+------------------------------------+
-                                                       |
-                              RDS Proxy --> RDS PostgreSQL Multi-AZ
-                              ElastiCache Redis Multi-AZ
-                                                       |
-                              S3 (Static Assets)    S3 (Failover Page)
-```
+![System Architecture](docs/architecture-diagram.png)
 
 **Key design decisions:**
 - **Graviton (ARM)** processors across compute and data layers for 20% cost reduction
-- **Spot Instances** with diversified types (t4g.medium, t4g.small, m6g.medium) for ~50-60% compute savings
-- **Business-hours-only compute** — resources operate ~260 hours/month (working hours), cutting compute costs by over 60%
+- **Spot Instances** with diversified types (t4g.large, m6g.large) for ~50-60% compute savings
 - **RDS Proxy** for sub-second database failover and connection pooling
 - **GitOps** with GitHub Actions (CI) and Argo CD (CD) for pull-based deployments
 - **DNS Failover** to a static S3 page ensures the status page is reachable even during full outages
@@ -36,7 +21,7 @@ Internet --> Route 53 (DNS Failover) --> AWS WAF --> ALB (HTTPS)
 
 ```
 terraform/          AWS infrastructure (VPC, EKS, RDS, ElastiCache, WAF, Route 53)
-k8s/                Kubernetes manifests (Deployments, Services, Ingress, HPA, Secrets)
+k8s/                Helm chart (Deployments, Services, Ingress, HPA, Secrets)
 argocd/             ArgoCD Application manifest (GitOps CD)
 .github/workflows/  CI pipelines (Terraform validation, Infracost cost estimation)
 docs/               Architecture documentation and cost estimation
@@ -48,7 +33,7 @@ The application source code lives in a [separate repository](https://github.com/
 
 | Layer | Technology |
 |---|---|
-| Orchestration | Amazon EKS (Kubernetes 1.30) |
+| Orchestration | Amazon EKS (Kubernetes 1.35) |
 | Compute | EC2 Spot Instances (Graviton/ARM) |
 | Database | RDS PostgreSQL 15 Multi-AZ + RDS Proxy |
 | Cache & Queue | ElastiCache Redis Multi-AZ |
@@ -89,22 +74,25 @@ terraform apply
 aws eks update-kubeconfig --name yosef-aviv-status-page-prod --region us-east-1
 ```
 
-**4. Deploy Kubernetes resources:**
+**4. Deploy via ArgoCD:**
 
 ```bash
-kubectl apply -k k8s/
+kubectl apply -f argocd/application.yaml
 ```
 
 ## Cost
 
-**$287/month** for a full Multi-AZ, high-availability architecture — under a $300 budget.
+**$390.28/month** for continuous 24/7 operation of the full Multi-AZ, high-availability architecture.
 
-| Layer | Monthly Cost |
-|---|---|
-| Compute (EKS + Spot Nodes) | $89.03 |
-| Data (RDS + RDS Proxy + Redis) | $90.30 |
-| Networking (NAT GWs + ALB) | $85.52 |
-| Security & Management | $21.90 |
+| Layer | Full 24/7 (730hr) | With College Scheduling (~260hr) |
+|---|---|---|
+| Compute (EKS + Spot Nodes) | $131.93 | $98.86 |
+| Data (RDS + RDS Proxy + Redis) | $150.93 | $90.30 |
+| Networking (NAT GWs + ALB) | $85.52 | $85.52 |
+| Security & Management | $21.90 | $21.90 |
+| **Total** | **$390.28** | **$296.58** |
+
+> The college AWS environment enforces a resource-scheduling policy that shuts down compute outside business hours, bringing effective cost to ~$296.58/month.
 
 See [docs/AWS Cost Estimation.md](docs/AWS%20Cost%20Estimation.md) for the full breakdown and [docs/System Architecture.md](docs/System%20Architecture.md) for architectural decisions and trade-offs.
 
