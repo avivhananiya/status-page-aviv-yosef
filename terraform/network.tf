@@ -15,8 +15,8 @@ module "vpc" {
   database_subnets = ["10.0.20.0/24", "10.0.21.0/24"]
 
   enable_nat_gateway     = true
-  single_nat_gateway     = true
-  one_nat_gateway_per_az = false
+  single_nat_gateway     = false
+  one_nat_gateway_per_az = true
 
   tags = {
     "Name"        = "${local.name_prefix}-vpc"
