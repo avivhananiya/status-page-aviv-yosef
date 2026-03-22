@@ -62,7 +62,7 @@ jobs:
 
       - name: Post PR comment
         run: |
-          infracost comment github \
+          INFRACOST_ENABLE_CLOUD=false infracost comment github \
             --path /tmp/infracost-diff.json \
             --repo ${{ github.repository }} \
             --pull-request ${{ github.event.pull_request.number }} \
