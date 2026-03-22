@@ -313,11 +313,6 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- Route 53 → S3 Failover health check label -->
-        <mxCell id="108" value="Health Check" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#DD344C;fontStyle=2;" vertex="1" parent="1">
-          <mxGeometry x="1090" y="140" width="70" height="20" as="geometry" />
-        </mxCell>
-
         <!-- ALB → Web Pods AZ-a -->
         <mxCell id="109a" value="HTTP traffic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#8C4FFF;strokeWidth=2;fontSize=9;fontColor=#8C4FFF;" edge="1" source="19" target="22" parent="1">
           <mxGeometry relative="1" as="geometry" />
@@ -396,6 +391,38 @@
         <!-- Actions → Infracost (on PR) -->
         <mxCell id="126" value="PR Analysis" style="html=1;strokeColor=#82b366;strokeWidth=1;dashed=1;fontSize=9;fontColor=#82b366;" edge="1" source="51" target="56" parent="1">
           <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== MISSING EDGES (accuracy fixes) ===== -->
+
+        <!-- EKS Node AZ-a → CloudWatch Observability (Logs via DaemonSet) -->
+        <mxCell id="130" value="Logs" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#E7157B;strokeWidth=1;dashed=1;fontSize=9;fontColor=#E7157B;" edge="1" source="20" target="cw_obs" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- EKS Node AZ-b → RDS Proxy (DB Queries) -->
+        <mxCell id="131" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#C925D1;strokeWidth=1.5;" edge="1" source="21" target="30" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Worker AZ-b → Redis Primary (Task Queue) -->
+        <mxCell id="132" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#C925D1;strokeWidth=1.5;" edge="1" source="25" target="28" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- EKS Node AZ-b → Secrets Manager (CSI Mount) -->
+        <mxCell id="133" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#DD344C;strokeWidth=1;dashed=1;" edge="1" source="21" target="32" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Terraform → SSM Parameters (Store Endpoints) -->
+        <mxCell id="134" value="Store Endpoints" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#E7157B;strokeWidth=1;dashed=1;fontSize=9;fontColor=#E7157B;" edge="1" source="tf_label" target="34" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- S3 Static Assets — served directly to browsers -->
+        <mxCell id="s3_note" value="&lt;i&gt;Served directly to browsers&lt;/i&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#3F8624;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="840" width="130" height="20" as="geometry" />
         </mxCell>
 
       </root>
