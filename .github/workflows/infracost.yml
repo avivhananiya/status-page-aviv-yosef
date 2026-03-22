@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout PR branch
         uses: actions/checkout@v4
 
       - name: Setup Terraform
@@ -32,18 +32,43 @@ jobs:
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
-      - name: Generate cost breakdown
+      - name: Generate PR branch breakdown
         run: |
           infracost breakdown \
             --path terraform \
             --terraform-init-flags "-backend=false" \
             --format json \
-            --out-file /tmp/infracost.json
+            --out-file /tmp/infracost-pr.json
+
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Terraform Init base (no backend)
+        run: terraform init -backend=false
+        working-directory: terraform
+
+      - name: Generate base branch breakdown
+        run: |
+          infracost breakdown \
+            --path terraform \
+            --terraform-init-flags "-backend=false" \
+            --format json \
+            --out-file /tmp/infracost-base.json
+
+      - name: Generate diff
+        run: |
+          infracost diff \
+            --path /tmp/infracost-pr.json \
+            --compare-to /tmp/infracost-base.json \
+            --format json \
+            --out-file /tmp/infracost-diff.json
 
       - name: Post PR comment
         run: |
           infracost comment github \
-            --path /tmp/infracost.json \
+            --path /tmp/infracost-diff.json \
             --repo ${{ github.repository }} \
             --pull-request ${{ github.event.pull_request.number }} \
             --github-token ${{ github.token }} \
