@@ -62,5 +62,5 @@ output "acm_certificate_arn" {
 
 output "sns_failover_topic_arn" {
   description = "SNS topic ARN for DNS failover alerts — subscribe your email to receive notifications"
-  value       = var.enable_dns_failover ? aws_sns_topic.failover_alert[0].arn : ""
+  value       = var.enable_sns_alerting ? aws_sns_topic.failover_alert[0].arn : ""
 }
