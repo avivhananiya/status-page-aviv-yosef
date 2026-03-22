@@ -24,3 +24,9 @@ variable "enable_dns_failover" {
   default     = true
   description = "Enable DNS failover records (requires ALB to exist). Was default false during initial bootstrap before ALB existed."
 }
+
+variable "enable_sns_alerting" {
+  type        = bool
+  default     = false
+  description = "Enable SNS topic + CloudWatch alarm for failover alerting. Requires SNS permissions (currently blocked by college IAM policy)."
+}

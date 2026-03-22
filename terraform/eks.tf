@@ -35,7 +35,8 @@ module "eks" {
       }
 
       tags = {
-        "NodeGroup" = "spot"
+        "NodeGroup"   = "spot"
+        "DoNotDelete" = "true"
       }
     }
 
@@ -59,7 +60,8 @@ module "eks" {
       }
 
       tags = {
-        "NodeGroup" = "on-demand"
+        "NodeGroup"   = "on-demand"
+        "DoNotDelete" = "true"
       }
     }
   }
