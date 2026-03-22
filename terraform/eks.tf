@@ -24,7 +24,7 @@ module "eks" {
 
       instance_types = ["t4g.large", "m6g.large"]
       ami_type       = "AL2023_ARM_64_STANDARD"
-      disk_size      = 20
+      disk_size      = 15
 
       key_name = null
 
@@ -49,7 +49,7 @@ module "eks" {
 
       instance_types = ["t4g.large", "m6g.large"]
       ami_type       = "AL2023_ARM_64_STANDARD"
-      disk_size      = 20
+      disk_size      = 15
 
       key_name = null
 
