@@ -17,6 +17,17 @@ resource "aws_s3_bucket" "static_files" {
   }
 }
 
+resource "aws_s3_bucket_cors_configuration" "static_files" {
+  bucket = aws_s3_bucket.static_files.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET"]
+    allowed_origins = ["https://yosef-aviv-statuspage.xyz"]
+    max_age_seconds = 86400
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "static_files" {
   bucket = aws_s3_bucket.static_files.id
 
