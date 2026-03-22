@@ -82,14 +82,14 @@ Once successful, our Continuous Delivery tool, **Argo CD**, detects changes in t
 
 The entire cloud infrastructure—including the VPC, EKS cluster, RDS and ElastiCache instances, S3 buckets, and edge routing (WAF, ALB, Route 53)—is exclusively provisioned via declarative code using **Terraform**. Terraform state is stored remotely in an S3 backend with DynamoDB locking to enable safe, collaborative infrastructure changes.
 
-### **3.5 Business-Hours Operating Model**
+### **3.5 Operating Model & Resource Scheduling**
 
-Compute resources operate during business hours only (~12 hours on weekdays), reducing compute and database runtime from 730 to approximately 260 hours per month.
+The architecture is designed for **continuous 24/7 operation**. In practice, the college AWS environment enforces an account-level resource-scheduling policy that automatically shuts down compute resources outside of business hours (~260 active hours/month). This scheduling is managed by the institution and is not under our control, but it reduces actual compute and database runtime significantly.
 
 **Key constraints for our architecture:**
 
 * **Always-on services:** ElastiCache Redis and RDS Proxy cannot be natively stopped or paused—they run 24/7. Their costs are accounted for at full-month pricing.
-* **DNS Failover during off-hours:** When compute resources are shut down, the ALB has no healthy backend targets. Route 53 detects this and failovers to the static S3 page—users visiting during off-hours see a maintenance page rather than a connection error.
+* **DNS Failover during off-hours:** When compute resources are shut down by the scheduling policy, the ALB has no healthy backend targets. Route 53 detects this and failovers to the static S3 page—users visiting during off-hours see a maintenance page rather than a connection error.
 * **Spot fallback on startup:** If Spot capacity is unavailable at morning startup, the on-demand node group (desired_size=0, max_size=1) serves as an emergency fallback via the Cluster Autoscaler.
 
 ### **3.6 Status-Page Availability & DNS Failover**
@@ -98,7 +98,6 @@ Because a status page is the resource users rely on during outages, it must rema
 
 1. **Route 53 Alias with "Evaluate Target Health":** The DNS record for the status page is an Alias to the ALB with target health evaluation enabled. Route 53 continuously monitors the ALB's backend target health at no additional cost and without passing through the WAF.
 2. **Static S3 Failover Page:** A pre-deployed static HTML page hosted on **Amazon S3** serves as a secondary Route 53 failover target. If the ALB health evaluation reports unhealthy, Route 53 automatically resolves DNS to the S3-hosted page, displaying a "We are investigating" notice to end users. During off-hours when compute resources are shut down, this failover activates by design, serving as the off-hours landing page.
-3. **SNS Alerting:** A CloudWatch alarm on the Route 53 health status metric triggers an SNS notification to the operations team when a failover is activated.
 
 ## **4\. Architectural Decisions and Trade-offs**
 
