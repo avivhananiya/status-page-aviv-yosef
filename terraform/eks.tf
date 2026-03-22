@@ -18,7 +18,7 @@ module "eks" {
     spot = {
       name          = "spot-nodes"
       desired_size  = 3
-      min_size      = 0
+      min_size      = 1
       max_size      = 4
       capacity_type = "SPOT"
 
