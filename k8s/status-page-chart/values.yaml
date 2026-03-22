@@ -6,7 +6,7 @@ namespace: "default"
 # Image Configuration
 image:
   repository: 992382545251.dkr.ecr.us-east-1.amazonaws.com/yosef-aviv-status-page-prod
-  tag: "ca2d6f3c763cf8c9e3efaa6a685cfec66ba6e86f"
+  tag: "e5aba3ae8575ee41e0b610571c69810b051ca67e"
   pullPolicy: Always
 
 # Scaling
