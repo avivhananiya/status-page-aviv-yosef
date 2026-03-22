@@ -211,7 +211,7 @@ resource "aws_route53_health_check" "alb" {
 }
 
 resource "aws_sns_topic" "failover_alert" {
-  count = var.enable_dns_failover ? 1 : 0
+  count = var.enable_sns_alerting ? 1 : 0
   name  = "${local.name_prefix}-failover-alert"
   tags = {
     Name        = "${local.name_prefix}-failover-alert"
@@ -221,7 +221,7 @@ resource "aws_sns_topic" "failover_alert" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "failover" {
-  count               = var.enable_dns_failover ? 1 : 0
+  count               = var.enable_sns_alerting ? 1 : 0
   alarm_name          = "${local.name_prefix}-failover-alert"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = 1
