@@ -37,14 +37,9 @@
           <mxGeometry x="790" y="240" width="48" height="48" as="geometry" />
         </mxCell>
 
-        <!-- CloudWatch Alarm -->
-        <mxCell id="6" value="CloudWatch&lt;br&gt;Alarm" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudwatch;" vertex="1" parent="1">
-          <mxGeometry x="1080" y="240" width="48" height="48" as="geometry" />
-        </mxCell>
-
-        <!-- SNS -->
-        <mxCell id="7" value="SNS&lt;br&gt;(Alerts)" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sns;" vertex="1" parent="1">
-          <mxGeometry x="1180" y="240" width="48" height="48" as="geometry" />
+        <!-- Route 53 Health Check label -->
+        <mxCell id="6" value="&lt;i&gt;evaluate_target_health&lt;/i&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#8C4FFF;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="170" width="130" height="20" as="geometry" />
         </mxCell>
 
         <!-- ===== VPC ===== -->
@@ -318,13 +313,23 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- Health check → CloudWatch → SNS -->
-        <mxCell id="107" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#E7157B;strokeWidth=1;" edge="1" source="6" target="7" parent="1">
+        <!-- Route 53 → S3 Failover health check label -->
+        <mxCell id="108" value="Health Check" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontColor=#DD344C;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="140" width="70" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ALB → Web Pods AZ-a -->
+        <mxCell id="109a" value="HTTP traffic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#8C4FFF;strokeWidth=2;fontSize=9;fontColor=#8C4FFF;" edge="1" source="19" target="22" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- Route 53 → CloudWatch (health status) -->
-        <mxCell id="108" value="Health Check" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#E7157B;strokeWidth=1;dashed=1;fontSize=9;fontColor=#E7157B;" edge="1" source="3" target="6" parent="1">
+        <!-- ALB → Web Pods AZ-b -->
+        <mxCell id="109b" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#8C4FFF;strokeWidth=2;" edge="1" source="19" target="23" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Workers → Redis (task queues) -->
+        <mxCell id="116" value="Task Queue" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#C925D1;strokeWidth=1.5;fontSize=9;fontColor=#C925D1;" edge="1" source="24" target="28" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
